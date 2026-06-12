@@ -4,7 +4,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "python manage.py migrate && gunicorn moiat_plan_50.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120",
+    "startCommand": "python manage.py migrate --run-syncdb && gunicorn moiat_plan_50.wsgi:application --bind 0.0.0.0:$PORT --workers 1 --timeout 120 --log-level debug",
     "healthcheckPath": "/",
     "restartPolicyType": "ON_FAILURE"
   }
