@@ -1,0 +1,120 @@
+{% extends 'plans/base.html' %}
+
+{% block title %}Моят План 50+ – Вашият личен план за активен живот{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section style="background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%); padding: 5rem 0;">
+    <div class="container text-center">
+        <div style="font-size: 3.5rem; margin-bottom: 1rem;">🌿</div>
+        <h1 style="font-size: 2.6rem; font-weight: 800; margin-bottom: 1.2rem; color: #1B5E20;">
+            Вашият личен план за активен живот след 50
+        </h1>
+        <p class="lead" style="font-size: 1.25rem; color: #37474F; max-width: 680px; margin: 0 auto 2.5rem;">
+            Отговорете на няколко въпроса и получете 7-дневен стартов план за
+            хранене, движение, навици и социален баланс.
+        </p>
+        <a href="{% url 'questionnaire' %}" class="btn-primary-custom" style="font-size: 1.3rem; padding: 1rem 3rem;">
+            Започни моя план
+        </a>
+        <p style="margin-top: 1.2rem; color: var(--muted); font-size: 0.95rem;">
+            Отнема около 3 минути • Без регистрация • Напълно безплатно
+        </p>
+    </div>
+</section>
+
+<!-- How it works -->
+<section style="padding: 5rem 0;">
+    <div class="container">
+        <h2 class="text-center mb-5" style="font-size: 2rem;">Как работи?</h2>
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-6 col-lg-3">
+                <div class="card-custom text-center" style="height: 100%;">
+                    <div class="step-number mx-auto mb-3">1</div>
+                    <h4>Попълвате кратък въпросник</h4>
+                    <p class="text-muted">15 прости въпроса за вашите навици, цели и начин на живот.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card-custom text-center" style="height: 100%;">
+                    <div class="step-number mx-auto mb-3">2</div>
+                    <h4>Получавате личен профил</h4>
+                    <p class="text-muted">Системата определя вашия профил и нужди.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card-custom text-center" style="height: 100%;">
+                    <div class="step-number mx-auto mb-3">3</div>
+                    <h4>Виждате 7-дневен план</h4>
+                    <p class="text-muted">Хранене, движение, навици и социална задача.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card-custom text-center" style="height: 100%;">
+                    <div class="step-number mx-auto mb-3">4</div>
+                    <h4>Изтегляте PDF</h4>
+                    <p class="text-muted">Запазете плана си и оставете обратна връзка.</p>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-5">
+            <a href="{% url 'questionnaire' %}" class="btn-primary-custom">
+                Започни моя план
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Benefits -->
+<section style="background: #fff; padding: 5rem 0;">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <h2 style="font-size: 2rem; margin-bottom: 1.5rem;">За кого е подходящо?</h2>
+                <ul style="list-style: none; padding: 0; font-size: 1.1rem;">
+                    <li style="padding: 0.6rem 0; border-bottom: 1px solid #eee;">
+                        ✅ За хора над 50, които искат да се чувстват по-добре
+                    </li>
+                    <li style="padding: 0.6rem 0; border-bottom: 1px solid #eee;">
+                        ✅ За тези, които нямат идея откъде да започнат
+                    </li>
+                    <li style="padding: 0.6rem 0; border-bottom: 1px solid #eee;">
+                        ✅ За хора, които искат повече енергия и движение
+                    </li>
+                    <li style="padding: 0.6rem 0; border-bottom: 1px solid #eee;">
+                        ✅ За тези, търсещи баланс и социален живот
+                    </li>
+                    <li style="padding: 0.6rem 0;">
+                        ✅ За всеки, готов за малки, но реални промени
+                    </li>
+                </ul>
+            </div>
+            <div class="col-lg-6">
+                <div class="card-custom" style="background: linear-gradient(135deg, #E8F5E9, #F9FBE7); text-align: center; padding: 3rem 2rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">💚</div>
+                    <h3 style="color: var(--primary);">Малки стъпки,<br>големи промени</h3>
+                    <p class="text-muted mt-3">
+                        Не е нужно да правите всичко наведнъж.<br>
+                        Един нов навик на ден е достатъчен.
+                    </p>
+                    <a href="{% url 'questionnaire' %}" class="btn-primary-custom mt-3">
+                        Започни сега
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Disclaimer -->
+<section style="padding: 3rem 0;">
+    <div class="container">
+        <div class="disclaimer">
+            <strong>Важно:</strong> Тази услуга предоставя <strong>общи препоръки за активен и балансиран начин на живот</strong>.
+            Тя не представлява медицинска консултация и не замества съвет от лекар.
+            При здравословни проблеми или преди да започнете нова физическа програма,
+            <strong>задължително се консултирайте с лекар</strong>.
+        </div>
+    </div>
+</section>
+{% endblock %}

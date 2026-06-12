@@ -1,0 +1,25 @@
+{% extends 'plans/base.html' %}
+
+{% block title %}Благодаря! – Моят План 50+{% endblock %}
+
+{% block content %}
+<section style="padding: 6rem 0; text-align: center;">
+    <div class="container" style="max-width: 600px;">
+        <div style="font-size: 4rem; margin-bottom: 1.5rem;">🙏</div>
+        <h1 style="font-size: 2.4rem; margin-bottom: 1rem;">Благодарим ви!</h1>
+        <p style="font-size: 1.2rem; color: #546E7A; margin-bottom: 2.5rem;">
+            Вашата обратна връзка ни помага да направим услугата по-добра
+            за хора като вас. Оценяваме го много!
+        </p>
+        <div class="card-custom" style="background: linear-gradient(135deg, #E8F5E9, #F1F8E9); margin-bottom: 2.5rem;">
+            <p style="font-size: 1.1rem; color: #2E7D32; font-weight: 600; margin: 0;">
+                Пожелаваме ви много успех с вашия план!<br>
+                Малките стъпки водят до велики промени. 💚
+            </p>
+        </div>
+        <a href="{% url 'home' %}" class="btn-primary-custom">
+            🏠 Към началната страница
+        </a>
+    </div>
+</section>
+{% endblock %}

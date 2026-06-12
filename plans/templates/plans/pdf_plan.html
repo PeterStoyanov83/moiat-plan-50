@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Моят План 50+ – {{ plan.profile_type }}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
+        body {
+            font-family: 'Nunito', Arial, sans-serif;
+            font-size: 13pt;
+            color: #2c3e50;
+            margin: 2cm;
+            line-height: 1.7;
+        }
+
+        h1 { font-size: 22pt; color: #1B5E20; margin-bottom: 5px; }
+        h2 { font-size: 15pt; color: #2E7D32; margin-top: 20px; margin-bottom: 6px; border-bottom: 2px solid #C8E6C9; padding-bottom: 4px; }
+        h3 { font-size: 13pt; color: #388E3C; margin-top: 14px; margin-bottom: 4px; }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: #E8F5E9;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+
+        .header .logo { font-size: 18pt; font-weight: 800; color: #2E7D32; }
+        .header .tagline { color: #546E7A; font-size: 10pt; margin-top: 4px; }
+
+        .profile-box {
+            background: #F1F8E9;
+            border-left: 5px solid #4CAF50;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .profile-type { font-size: 18pt; font-weight: 800; color: #1B5E20; margin: 0 0 8px; }
+        .profile-desc { color: #37474F; margin: 0; }
+
+        .section {
+            background: #fff;
+            border: 1px solid #E0E0E0;
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin-bottom: 14px;
+        }
+
+        .goal-box {
+            background: #FFF8E1;
+            border-left: 5px solid #FF8F00;
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .disclaimer {
+            font-size: 9pt;
+            color: #78909C;
+            border: 1px solid #CFD8DC;
+            padding: 10px 14px;
+            border-radius: 6px;
+            margin-top: 20px;
+            background: #FAFAFA;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 9pt;
+            color: #90A4AE;
+            margin-top: 30px;
+            border-top: 1px solid #E0E0E0;
+            padding-top: 12px;
+        }
+
+        pre, .pre-text {
+            white-space: pre-line;
+            font-family: inherit;
+            margin: 6px 0 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">🌿 Моят План 50+</div>
+    <div class="tagline">Вашият личен план за активен живот след 50</div>
+</div>
+
+<div class="profile-box">
+    <p class="profile-type">{{ plan.profile_type }}</p>
+    <p class="profile-desc">{{ plan.profile_description }}</p>
+</div>
+
+<div class="section">
+    <h2>🥗 Хранителни насоки</h2>
+    <div class="pre-text">{{ plan.nutrition_plan }}</div>
+</div>
+
+<div class="section">
+    <h2>🚶 7-дневен план за движение</h2>
+    <div class="pre-text">{{ plan.movement_plan }}</div>
+</div>
+
+<div class="section">
+    <h2>✨ Ежедневни навици</h2>
+    <div class="pre-text">{{ plan.habits_plan }}</div>
+</div>
+
+<div class="section">
+    <h2>💰 Финансов навик</h2>
+    <p>{{ plan.financial_habit }}</p>
+</div>
+
+<div class="section">
+    <h2>🤝 Социална задача</h2>
+    <p>{{ plan.social_plan }}</p>
+</div>
+
+<div class="goal-box">
+    <h2 style="border: none; margin-top: 0;">🎯 Вашата 90-дневна цел</h2>
+    <p><strong>„{{ plan.response.ninety_day_goal }}"</strong></p>
+    <p>Как да стигнете до нея:</p>
+    <ul>
+        <li>Месец 1: Изградете основни навици от този план</li>
+        <li>Месец 2: Добавете нови малки предизвикателства</li>
+        <li>Месец 3: Проследете напредъка и отпразнувайте успеха си!</li>
+    </ul>
+</div>
+
+<div class="disclaimer">
+    <strong>Важно:</strong> Тази услуга предоставя общи препоръки за активен и балансиран начин на живот.
+    Не е медицинска консултация и не замества съвет от лекар.
+    При здравословни проблеми или преди да започнете нова физическа програма,
+    <strong>задължително се консултирайте с лекар</strong>.
+</div>
+
+<div class="footer">
+    Моят План 50+ &copy; 2024 &bull; Генериран на {{ plan.created_at|date:"d.m.Y" }}
+</div>
+
+</body>
+</html>

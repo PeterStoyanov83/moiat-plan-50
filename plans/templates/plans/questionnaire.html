@@ -1,0 +1,225 @@
+{% extends 'plans/base.html' %}
+
+{% block title %}Въпросник – Моят План 50+{% endblock %}
+
+{% block content %}
+<section style="padding: 3rem 0 5rem;">
+    <div class="container" style="max-width: 760px;">
+        <div class="text-center mb-5">
+            <h1 style="font-size: 2rem;">Вашият личен въпросник</h1>
+            <p class="text-muted" style="font-size: 1.1rem;">
+                Отговорете честно – само така планът ще бъде наистина ваш.
+                Всичко е поверително и анонимно.
+            </p>
+        </div>
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <!-- Section 1: Personal info -->
+            <h4 style="color: var(--primary); margin: 2rem 0 1rem; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px;">
+                👤 За вас
+            </h4>
+
+            <div class="question-block">
+                <label class="question-label">{{ form.age.label }}</label>
+                {{ form.age }}
+                {% if form.age.errors %}<div class="text-danger mt-1">{{ form.age.errors }}</div>{% endif %}
+            </div>
+
+            <div class="question-block">
+                <label class="question-label">{{ form.gender.label }}</label>
+                {% for radio in form.gender %}
+                <div class="form-check mb-2">
+                    {{ radio.tag }}
+                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="question-block">
+                        <label class="question-label">{{ form.height.label }}</label>
+                        {{ form.height }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="question-block">
+                        <label class="question-label">{{ form.weight.label }}</label>
+                        {{ form.weight }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <label class="question-label">{{ form.working_status.label }}</label>
+                {% for radio in form.working_status %}
+                <div class="form-check mb-2">
+                    {{ radio.tag }}
+                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="question-block">
+                <label class="question-label">{{ form.living_status.label }}</label>
+                {% for radio in form.living_status %}
+                <div class="form-check mb-2">
+                    {{ radio.tag }}
+                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Section 2: Energy & Sleep -->
+            <h4 style="color: var(--primary); margin: 2rem 0 1rem; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px;">
+                ⚡ Енергия и сън
+            </h4>
+
+            <div class="question-block">
+                <label class="question-label">{{ form.energy_level.label }}</label>
+                <div class="d-flex gap-3 flex-wrap">
+                {% for radio in form.energy_level %}
+                <div class="form-check">
+                    {{ radio.tag }}
+                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                </div>
+                {% endfor %}
+                </div>
+                <small class="text-muted">1 = много ниско, 5 = отлично</small>
+            </div>
+
+            <div class="question-block">
+                <label class="question-label">{{ form.sleep_hours.label }}</label>
+                {% for radio in form.sleep_hours %}
+                <div class="form-check mb-2">
+                    {{ radio.tag }}
+                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="question-block">
+                <label class="question-label">{{ form.health_limitations.label }}</label>
+                {{ form.health_limitations }}
+                <small class="text-muted d-block mt-1">По желание – само ако е важно за вашия план</small>
+            </div>
+
+            <!-- Section 3: Nutrition -->
+            <h4 style="color: var(--primary); margin: 2rem 0 1rem; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px;">
+                🥗 Хранене
+            </h4>
+
+            <div class="question-block">
+                <label class="question-label">{{ form.eating_frequency.label }}</label>
+                {% for radio in form.eating_frequency %}
+                <div class="form-check mb-2">
+                    {{ radio.tag }}
+                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="question-block">
+                <label class="question-label">{{ form.evening_meal_type.label }}</label>
+                {% for radio in form.evening_meal_type %}
+                <div class="form-check mb-2">
+                    {{ radio.tag }}
+                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Section 4: Movement -->
+            <h4 style="color: var(--primary); margin: 2rem 0 1rem; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px;">
+                🚶 Движение
+            </h4>
+
+            <div class="question-block">
+                <label class="question-label">{{ form.movement_level.label }}</label>
+                {% for radio in form.movement_level %}
+                <div class="form-check mb-2">
+                    {{ radio.tag }}
+                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="question-block">
+                <label class="question-label">{{ form.preferred_movement.label }}</label>
+                {% for radio in form.preferred_movement %}
+                <div class="form-check mb-2">
+                    {{ radio.tag }}
+                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="question-block">
+                <label class="question-label">{{ form.joint_pain.label }}</label>
+                {% for radio in form.joint_pain %}
+                <div class="form-check mb-2">
+                    {{ radio.tag }}
+                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Section 5: Goals & Social -->
+            <h4 style="color: var(--primary); margin: 2rem 0 1rem; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px;">
+                🎯 Цели и социален живот
+            </h4>
+
+            <div class="question-block">
+                <label class="question-label">{{ form.main_goal.label }}</label>
+                {% for radio in form.main_goal %}
+                <div class="form-check mb-2">
+                    {{ radio.tag }}
+                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="question-block">
+                <label class="question-label">{{ form.social_activity.label }}</label>
+                {% for radio in form.social_activity %}
+                <div class="form-check mb-2">
+                    {{ radio.tag }}
+                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="question-block">
+                <label class="question-label">{{ form.has_hobby.label }}</label>
+                <div class="form-check mt-1">
+                    {{ form.has_hobby }}
+                    <label class="form-check-label" for="{{ form.has_hobby.id_for_label }}">Да, имам хоби</label>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <label class="question-label">{{ form.ninety_day_goal.label }}</label>
+                {{ form.ninety_day_goal }}
+                {% if form.ninety_day_goal.errors %}
+                <div class="text-danger mt-1">{{ form.ninety_day_goal.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn-primary-custom" style="font-size: 1.2rem; padding: 1rem 3rem;">
+                    Виж моя план →
+                </button>
+                <p class="text-muted mt-3" style="font-size: 0.9rem;">
+                    При здравословни проблеми се консултирайте с лекар.
+                </p>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

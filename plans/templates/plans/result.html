@@ -1,0 +1,92 @@
+{% extends 'plans/base.html' %}
+
+{% block title %}Вашият план – Моят План 50+{% endblock %}
+
+{% block content %}
+<section style="padding: 3rem 0 5rem;">
+    <div class="container" style="max-width: 860px;">
+
+        <!-- Profile header -->
+        <div class="text-center mb-5" style="padding: 3rem 2rem; background: linear-gradient(135deg, #E8F5E9, #F1F8E9); border-radius: 20px;">
+            <div style="font-size: 3rem; margin-bottom: 0.5rem;">🌿</div>
+            <p style="color: var(--primary); font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 0.5rem;">
+                Вашият профил
+            </p>
+            <h1 style="font-size: 2.4rem; color: #1B5E20; margin-bottom: 1.5rem;">
+                {{ plan.profile_type }}
+            </h1>
+            <p style="font-size: 1.15rem; color: #37474F; max-width: 640px; margin: 0 auto;">
+                {{ plan.profile_description }}
+            </p>
+        </div>
+
+        <!-- Plan sections -->
+        <div class="card-custom">
+            <div class="section-icon">🥗</div>
+            <h3>Хранителни насоки</h3>
+            <div style="white-space: pre-line; font-size: 1.05rem; margin-top: 1rem; line-height: 2;">{{ plan.nutrition_plan }}</div>
+        </div>
+
+        <div class="card-custom">
+            <div class="section-icon">🚶</div>
+            <h3>7-дневен план за движение</h3>
+            <div style="white-space: pre-line; font-size: 1.05rem; margin-top: 1rem; line-height: 2.2;">{{ plan.movement_plan }}</div>
+        </div>
+
+        <div class="card-custom">
+            <div class="section-icon">✨</div>
+            <h3>Ежедневни навици</h3>
+            <div style="white-space: pre-line; font-size: 1.05rem; margin-top: 1rem; line-height: 2;">{{ plan.habits_plan }}</div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card-custom" style="height: 100%;">
+                    <div class="section-icon">💰</div>
+                    <h3>Финансов навик</h3>
+                    <p style="font-size: 1.05rem; margin-top: 1rem; line-height: 1.9;">{{ plan.financial_habit }}</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card-custom" style="height: 100%;">
+                    <div class="section-icon">🤝</div>
+                    <h3>Социална задача</h3>
+                    <p style="font-size: 1.05rem; margin-top: 1rem; line-height: 1.9;">{{ plan.social_plan }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-custom" style="background: linear-gradient(135deg, #FFF8E1, #FFF3E0); border-left: 5px solid var(--accent);">
+            <div class="section-icon">🎯</div>
+            <h3>Вашата 90-дневна цел</h3>
+            <div style="white-space: pre-line; font-size: 1.05rem; margin-top: 1rem; line-height: 2;">{{ plan.response.ninety_day_goal|default:"" }}</div>
+            <div style="white-space: pre-line; font-size: 1.05rem; margin-top: 1rem; line-height: 2; color: #5D4037;">
+                Как да стигнете до нея:
+                • Месец 1: Изградете основни навици от този план
+                • Месец 2: Добавете нови малки предизвикателства
+                • Месец 3: Проследете напредъка и отпразнувайте успеха си!
+            </div>
+        </div>
+
+        <!-- Disclaimer -->
+        <div class="disclaimer mb-5">
+            <strong>Важно:</strong> Тази услуга предоставя общи препоръки за активен и балансиран начин на живот.
+            Не е медицинска консултация. <strong>При здравословни проблеми се консултирайте с лекар.</strong>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="text-center" style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
+            <a href="{% url 'download_pdf' plan.pk %}" class="btn-accent">
+                📄 Изтегли PDF
+            </a>
+            <a href="{% url 'feedback' plan.response.pk %}" class="btn-primary-custom">
+                💬 Остави обратна връзка
+            </a>
+            <a href="{% url 'home' %}" style="border: 2px solid #ccc; border-radius: 50px; padding: 0.85rem 2rem; text-decoration: none; color: var(--text); font-weight: 600; font-size: 1.05rem;">
+                🏠 Начало
+            </a>
+        </div>
+
+    </div>
+</section>
+{% endblock %}
