@@ -1,0 +1,11 @@
+[phases.setup]
+nixPkgs = ["pango", "cairo", "gdk-pixbuf", "libffi", "gobject-introspection", "harfbuzz", "fontconfig"]
+
+[phases.install]
+cmds = ["pip install -r requirements.txt"]
+
+[phases.build]
+cmds = ["python manage.py collectstatic --noinput"]
+
+[start]
+cmd = "python manage.py migrate && gunicorn moiat_plan_50.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120"
