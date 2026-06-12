@@ -17,16 +17,25 @@ Django MVP app that generates a personalized 7-day health plan for people 50+.
 - Static files collected at build time via `CompressedStaticFilesStorage`
 - All migrations apply cleanly
 - Gunicorn starts and listens on `0.0.0.0:8000` confirmed in logs
+- `PORT=8000` set manually in Railway Variables tab
+- Custom Start Command in Railway UI set to `sh start.sh`
 
 ### ⚠️ Last known blocker
-**Railway healthcheck still failing** — gunicorn runs fine but Railway's load balancer has no target port configured, so it can't route traffic to the container.
+**Railway healthcheck still failing** — gunicorn runs fine on port 8000 inside the container, but Railway's load balancer target port is not set, so external traffic can't reach it.
 
-**One manual step required in Railway dashboard:**
+**One manual step still required in Railway dashboard:**
 ```
 Settings → Networking → click domain row
 → "Edit Port" field → type 8000 → click Update
 ```
-Once this is done, the app should be live.
+
+### Debugging history (so you don't repeat it)
+| Attempt | Problem | Fix |
+|---------|---------|-----|
+| Nixpacks | `nixpacks.toml` silently ignored; pango/cairo missing | Switched to Dockerfile |
+| WhiteNoise crash | `CompressedManifestStaticFilesStorage` needs manifest; collectstatic ran with wrong storage | Use `CompressedStaticFilesStorage` |
+| `$PORT` not expanding | Railway CMD handling didn't shell-expand `$PORT` | Created `start.sh` with explicit `export PORT="${PORT:-8000}"` |
+| Port not routed | Gunicorn running on 8000 but Railway proxy has no target port | Need to set Edit Port → 8000 in Networking UI |
 
 ---
 
@@ -118,8 +127,9 @@ Then access admin at: `https://web-production-e3b54.up.railway.app/admin/`
 ---
 
 ## Next Steps (backlog)
-- [ ] Fix the Railway port (Edit Port → 8000) to make app live
-- [ ] Create superuser via Railway shell
-- [ ] Add PostgreSQL plugin for persistent data
+- [ ] **CRITICAL:** Set Edit Port → 8000 in Railway Networking to make app live
+- [ ] Create superuser via Railway shell once live
+- [ ] Add PostgreSQL plugin for persistent data (SQLite is ephemeral on Railway)
 - [ ] Test full user flow on production
-- [ ] Test PDF download (WeasyPrint needs pango/cairo — already installed in Dockerfile)
+- [ ] Test PDF download (WeasyPrint + pango/cairo already in Dockerfile)
+- [ ] Set `ALLOWED_HOSTS` to exact Railway domain in Variables if getting 400 errors
