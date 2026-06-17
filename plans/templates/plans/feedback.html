@@ -5,6 +5,45 @@
 {% block content %}
 <section style="padding: 3rem 0 5rem;">
     <div class="container" style="max-width: 700px;">
+
+        <!-- Profile summary card -->
+        <div style="background: #f8fdf9; border: 1px solid #c8e6c9; border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 2.5rem;">
+            <h2 style="font-size: 1.2rem; color: var(--primary); margin-bottom: 1rem;">
+                👤 Профил на участника
+            </h2>
+            {% if response.plan %}
+            <div style="font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; color: #2e7d32;">
+                Тип: {{ response.plan.profile_type }}
+            </div>
+            {% endif %}
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem 1.5rem; font-size: 0.93rem; color: #444;">
+                <div><span style="color:#888;">Възраст:</span> {{ response.age }} г.</div>
+                <div><span style="color:#888;">Пол:</span> {{ response.gender }}</div>
+                <div><span style="color:#888;">Ръст / тегло:</span> {{ response.height }} см / {{ response.weight }} кг</div>
+                <div><span style="color:#888;">Работен статус:</span> {{ response.working_status }}</div>
+                <div><span style="color:#888;">Живее:</span> {{ response.living_status }}</div>
+                <div><span style="color:#888;">Енергия:</span> {{ response.energy_level }}/5</div>
+                <div><span style="color:#888;">Сън:</span> {{ response.sleep_hours }} ч.</div>
+                <div><span style="color:#888;">Хранене:</span> {{ response.eating_frequency }}</div>
+                <div><span style="color:#888;">Вечеря:</span> {{ response.evening_meal_type }}</div>
+                <div><span style="color:#888;">Основна цел:</span> {{ response.main_goal }}</div>
+                <div><span style="color:#888;">Движение:</span> {{ response.movement_level }}</div>
+                <div><span style="color:#888;">Предпочитано:</span> {{ response.preferred_movement }}</div>
+                <div><span style="color:#888;">Болки в ставите:</span> {{ response.joint_pain }}</div>
+                <div><span style="color:#888;">Социална активност:</span> {{ response.social_activity }}</div>
+                <div><span style="color:#888;">Хоби:</span> {% if response.has_hobby %}Да{% else %}Не{% endif %}</div>
+            </div>
+            {% if response.health_limitations %}
+            <div style="margin-top: 0.75rem; font-size: 0.93rem;">
+                <span style="color:#888;">Здравословни ограничения:</span> {{ response.health_limitations }}
+            </div>
+            {% endif %}
+            <div style="margin-top: 0.75rem; font-size: 0.93rem;">
+                <span style="color:#888;">90-дневна цел:</span> {{ response.ninety_day_goal }}
+            </div>
+        </div>
+
+        <!-- Feedback form -->
         <div class="text-center mb-5">
             <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">💬</div>
             <h1 style="font-size: 2rem;">Вашето мнение е важно за нас</h1>
