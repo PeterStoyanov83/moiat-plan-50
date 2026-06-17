@@ -15,7 +15,7 @@ class QuestionnaireResponse(models.Model):
     evening_meal_type = models.CharField(max_length=50, verbose_name='Вечерно хранене')
     main_goal = models.CharField(max_length=50, verbose_name='Основна цел')
     movement_level = models.CharField(max_length=50, verbose_name='Ниво на движение')
-    preferred_movement = models.CharField(max_length=50, verbose_name='Предпочитано движение')
+    preferred_movement = models.CharField(max_length=200, verbose_name='Предпочитано движение')
     joint_pain = models.CharField(max_length=20, verbose_name='Болки в ставите')
     social_activity = models.CharField(max_length=50, verbose_name='Социална активност')
     has_hobby = models.BooleanField(verbose_name='Има хоби')

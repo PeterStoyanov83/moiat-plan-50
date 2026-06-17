@@ -166,10 +166,10 @@ class QuestionnaireForm(forms.ModelForm):
         choices=MOVEMENT_LEVEL_CHOICES,
         widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
     )
-    preferred_movement = forms.ChoiceField(
-        label='Какъв вид движение предпочитате?',
+    preferred_movement = forms.MultipleChoiceField(
+        label='Какъв вид движение предпочитате? (може да изберете повече от едно)',
         choices=PREFERRED_MOVEMENT_CHOICES,
-        widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
     )
     joint_pain = forms.ChoiceField(
         label='Имате ли болки в ставите или гръбначния стълб?',
@@ -209,6 +209,9 @@ class QuestionnaireForm(forms.ModelForm):
 
     def clean_sleep_hours(self):
         return int(self.cleaned_data['sleep_hours'])
+
+    def clean_preferred_movement(self):
+        return ', '.join(self.cleaned_data['preferred_movement'])
 
 
 class FeedbackForm(forms.ModelForm):

@@ -19,7 +19,8 @@ def determine_profile(response):
 
 def generate_plan(response, profile_type):
     goal = response.ninety_day_goal or 'да се чувствате по-добре'
-    movement = response.preferred_movement or 'ходене'
+    movements = [m.strip() for m in (response.preferred_movement or 'ходене').split(',') if m.strip()]
+    movement = movements[0] if movements else 'ходене'
 
     plans = {
         PROFILE_LEK_START: {
