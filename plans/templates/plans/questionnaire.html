@@ -1,6 +1,6 @@
 {% extends 'plans/base.html' %}
 
-{% block title %}Въпросник – Моят План 50+{% endblock %}
+{% block title %}Въпросник – 1Step{% endblock %}
 
 {% block content %}
 <section style="padding: 3rem 0 5rem;">
@@ -208,6 +208,19 @@
                 {{ form.ninety_day_goal }}
                 {% if form.ninety_day_goal.errors %}
                 <div class="text-danger mt-1">{{ form.ninety_day_goal.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="question-block" style="background: #F1F8E9;">
+                <div class="form-check">
+                    {{ form.consent_given }}
+                    <label class="form-check-label" for="{{ form.consent_given.id_for_label }}" style="font-size: 1.05rem;">
+                        {{ form.consent_given.label }}
+                        Вижте <a href="{% url 'privacy' %}" target="_blank" rel="noopener">Политиката за поверителност</a>.
+                    </label>
+                </div>
+                {% if form.consent_given.errors %}
+                <div class="text-danger mt-1">{{ form.consent_given.errors }}</div>
                 {% endif %}
             </div>
 

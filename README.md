@@ -1,4 +1,4 @@
-# Моят План 50+
+# 1Step
 
 MVP уеб приложение, което помага на хора над 50 години да получат персонален 7-дневен стартов план за по-здрав, активен и балансиран живот.
 
@@ -80,7 +80,7 @@ moiat_plan_50/
 ├── manage.py
 ├── requirements.txt
 ├── README.md
-├── moiat_plan_50/
+├── onestep/               # Django project package (was moiat_plan_50/)
 │   ├── settings.py
 │   ├── urls.py
 │   └── wsgi.py

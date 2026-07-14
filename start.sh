@@ -5,7 +5,7 @@ echo "PORT=$PORT"
 echo "Running migrations..."
 python manage.py migrate --run-syncdb
 echo "Starting gunicorn on 0.0.0.0:$PORT"
-exec gunicorn moiat_plan_50.wsgi:application \
+exec gunicorn onestep.wsgi:application \
     --bind "0.0.0.0:$PORT" \
     --workers 1 \
     --timeout 120 \

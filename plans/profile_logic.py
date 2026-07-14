@@ -1,3 +1,10 @@
+from .knowledge_base import (
+    build_movement_plan,
+    build_nutrition_plan,
+    build_social_plan,
+    build_financial_habit,
+)
+
 PROFILE_LEK_START = 'Лек старт'
 PROFILE_OTSLABVANE = 'Отслабване без стрес'
 PROFILE_ENERGIYA = 'Повече енергия'
@@ -215,6 +222,19 @@ def generate_plan(response, profile_type):
     }
 
     plan_data = plans.get(profile_type, plans[PROFILE_BALANS])
+
+    # The profile dict supplies the tone (description + daily habits); the
+    # curated knowledge base supplies the concrete, level-matched tasks.
+    # If the KB is unavailable (e.g. missing data file in a deploy), keep the
+    # profile's hardcoded text rather than failing the whole request.
+    try:
+        plan_data['nutrition'] = build_nutrition_plan(response)
+        plan_data['movement'] = build_movement_plan(response)
+        plan_data['social'] = build_social_plan(response)
+        plan_data['financial'] = build_financial_habit(response)
+    except Exception:
+        pass
+
     plan_data['ninety_day_goal'] = (
         f'Вашата 90-дневна цел: „{goal}"\n\n'
         'Как да стигнете до нея:\n'

@@ -13,12 +13,37 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-local-dev-only-xyz123
 
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
+ALLOWED_HOSTS = [h.strip() for h in os.environ.get('ALLOWED_HOSTS', '*').split(',') if h.strip()]
 
-CSRF_TRUSTED_ORIGINS = os.environ.get(
+# Always accept Railway's internal healthcheck host and the app's own Railway
+# domains, so a strict prod ALLOWED_HOSTS doesn't 400 the platform healthcheck
+# (which probes with Host: healthcheck.railway.app, not the public domain).
+# A leading-dot entry matches the domain and all its subdomains.
+ALLOWED_HOSTS += ['.railway.app']
+RAILWAY_PUBLIC_DOMAIN = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+if RAILWAY_PUBLIC_DOMAIN:
+    ALLOWED_HOSTS.append(RAILWAY_PUBLIC_DOMAIN)
+
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.environ.get(
     'CSRF_TRUSTED_ORIGINS',
     'https://web-production-e3b54.up.railway.app'
-).split(',')
+).split(',') if o.strip()]
+CSRF_TRUSTED_ORIGINS.append('https://*.railway.app')
+if RAILWAY_PUBLIC_DOMAIN:
+    CSRF_TRUSTED_ORIGINS.append(f'https://{RAILWAY_PUBLIC_DOMAIN}')
+
+# Production hardening (only when DEBUG is off, i.e. on Railway).
+if not DEBUG:
+    # Railway terminates TLS at its edge and forwards over HTTP internally.
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    # NOTE: intentionally NOT setting SECURE_SSL_REDIRECT. Railway's internal
+    # healthcheck hits the container over plain HTTP without X-Forwarded-Proto,
+    # so a redirect-to-HTTPS would turn the healthcheck into a 301 and fail it.
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -41,7 +66,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'moiat_plan_50.urls'
+ROOT_URLCONF = 'onestep.urls'
 
 TEMPLATES = [
     {
@@ -59,7 +84,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'moiat_plan_50.wsgi.application'
+WSGI_APPLICATION = 'onestep.wsgi.application'
 
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL:

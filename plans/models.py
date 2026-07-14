@@ -20,6 +20,9 @@ class QuestionnaireResponse(models.Model):
     social_activity = models.CharField(max_length=50, verbose_name='Социална активност')
     has_hobby = models.BooleanField(verbose_name='Има хоби')
     ninety_day_goal = models.TextField(verbose_name='90-дневна цел')
+    consent_given = models.BooleanField(
+        default=False, verbose_name='Съгласие за обработка на лични данни'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

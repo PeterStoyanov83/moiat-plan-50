@@ -1,4 +1,4 @@
-# HANDOFF – Моят План 50+
+# HANDOFF – 1Step
 
 ## Project
 Django MVP app that generates a personalized 7-day health plan for people 50+.
@@ -20,14 +20,21 @@ Django MVP app that generates a personalized 7-day health plan for people 50+.
 - `PORT=8000` set manually in Railway Variables tab
 - Custom Start Command in Railway UI set to `sh start.sh`
 
-### ⚠️ Last known blocker
-**Railway healthcheck still failing** — gunicorn runs fine on port 8000 inside the container, but Railway's load balancer target port is not set, so external traffic can't reach it.
+### ✅ Healthcheck blocker — ROOT-CAUSED AND FIXED (2026-07-10)
+The real cause was **not** the load-balancer port. With `DEBUG=False` and
+`ALLOWED_HOSTS` set to only the public domain, Django returned **HTTP 400
+(Invalid HTTP_HOST header)** to Railway's healthcheck, which probes `/` with
+`Host: healthcheck.railway.app` — not the public domain. Gunicorn was up, but
+every healthcheck got a non-2xx, so the deploy never went healthy — and because
+it never went healthy, Railway never finalized the domain's target port (which
+is why the manual "Edit Port" step *appeared* to be needed). One root cause.
 
-**One manual step still required in Railway dashboard:**
-```
-Settings → Networking → click domain row
-→ "Edit Port" field → type 8000 → click Update
-```
+**Fix (in `settings.py`, committed):** always append `.railway.app` to
+`ALLOWED_HOSTS` and `https://*.railway.app` to `CSRF_TRUSTED_ORIGINS`,
+regardless of the env var, plus auto-pick up `RAILWAY_PUBLIC_DOMAIN`. Verified
+locally: `healthcheck.railway.app` now accepted, `evil.com` still rejected.
+Also added prod cookie/HSTS hardening — but intentionally **left
+`SECURE_SSL_REDIRECT` off** so the internal (HTTP) healthcheck isn't 301'd.
 
 ### Debugging history (so you don't repeat it)
 | Attempt | Problem | Fix |
@@ -35,7 +42,7 @@ Settings → Networking → click domain row
 | Nixpacks | `nixpacks.toml` silently ignored; pango/cairo missing | Switched to Dockerfile |
 | WhiteNoise crash | `CompressedManifestStaticFilesStorage` needs manifest; collectstatic ran with wrong storage | Use `CompressedStaticFilesStorage` |
 | `$PORT` not expanding | Railway CMD handling didn't shell-expand `$PORT` | Created `start.sh` with explicit `export PORT="${PORT:-8000}"` |
-| Port not routed | Gunicorn running on 8000 but Railway proxy has no target port | Need to set Edit Port → 8000 in Networking UI |
+| ~~Port not routed~~ | *Misdiagnosis.* Real cause: Django 400'd the healthcheck host | Added `.railway.app` to `ALLOWED_HOSTS` in `settings.py` |
 
 ---
 
@@ -48,8 +55,9 @@ moiat_plan_50/
 ├── railway.json            # builder: DOCKERFILE, healthcheck: /
 ├── requirements.txt        # Django, WeasyPrint, gunicorn, psycopg2, whitenoise, dj-database-url, python-dotenv
 ├── .env                    # local only (gitignored): DEBUG=True, SECRET_KEY, ALLOWED_HOSTS
-├── moiat_plan_50/
+├── onestep/                # Django project package (was moiat_plan_50/)
 │   ├── settings.py         # reads from env vars via python-dotenv
+│   ├── wsgi.py             # gunicorn target: onestep.wsgi:application
 │   └── urls.py
 └── plans/                  # main Django app
     ├── models.py            # QuestionnaireResponse, UserPlan, Feedback
@@ -127,7 +135,8 @@ Then access admin at: `https://web-production-e3b54.up.railway.app/admin/`
 ---
 
 ## Next Steps (backlog)
-- [ ] **CRITICAL:** Set Edit Port → 8000 in Railway Networking to make app live
+- [x] ~~CRITICAL: Set Edit Port → 8000~~ — superseded by the `ALLOWED_HOSTS` fix; redeploy from `main` and the healthcheck should pass on its own
+- [ ] Redeploy and confirm healthcheck goes green (no dashboard step needed)
 - [ ] Create superuser via Railway shell once live
 - [ ] Add PostgreSQL plugin for persistent data (SQLite is ephemeral on Railway)
 - [ ] Test full user flow on production

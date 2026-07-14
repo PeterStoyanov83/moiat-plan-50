@@ -194,6 +194,13 @@ class QuestionnaireForm(forms.ModelForm):
             'placeholder': 'напр. "Искам да се чувствам по-леко и да имам енергия за внуците"',
         }),
     )
+    consent_given = forms.BooleanField(
+        label='Съгласявам се личните ми данни (включително здравна информация) да бъдат '
+              'обработени за изготвяне на моя личен план.',
+        required=True,
+        error_messages={'required': 'Трябва да се съгласите, за да продължите.'},
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+    )
 
     class Meta:
         model = QuestionnaireResponse
@@ -202,6 +209,7 @@ class QuestionnaireForm(forms.ModelForm):
             'energy_level', 'sleep_hours', 'health_limitations', 'eating_frequency',
             'evening_meal_type', 'main_goal', 'movement_level', 'preferred_movement',
             'joint_pain', 'social_activity', 'has_hobby', 'ninety_day_goal',
+            'consent_given',
         ]
 
     def clean_energy_level(self):

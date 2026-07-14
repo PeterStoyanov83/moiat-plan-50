@@ -11,6 +11,10 @@ def home(request):
     return render(request, 'plans/home.html')
 
 
+def privacy(request):
+    return render(request, 'plans/privacy.html')
+
+
 def questionnaire(request):
     if request.method == 'POST':
         form = QuestionnaireForm(request.POST)
@@ -48,7 +52,7 @@ def download_pdf(request, plan_id):
         from weasyprint import HTML
         pdf_file = HTML(string=html_string).write_pdf()
         response = HttpResponse(pdf_file, content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="moiat_plan_50_{plan_id}.pdf"'
+        response['Content-Disposition'] = f'attachment; filename="1step_{plan_id}.pdf"'
         return response
     except ImportError:
         return HttpResponse(

@@ -1,6 +1,6 @@
 {% extends 'plans/base.html' %}
 
-{% block title %}Вашият план – Моят План 50+{% endblock %}
+{% block title %}Вашият план – 1Step{% endblock %}
 
 {% block content %}
 <section style="padding: 3rem 0 5rem;">
@@ -44,14 +44,14 @@
                 <div class="card-custom" style="height: 100%;">
                     <div class="section-icon">💰</div>
                     <h3>Финансов навик</h3>
-                    <p style="font-size: 1.05rem; margin-top: 1rem; line-height: 1.9;">{{ plan.financial_habit }}</p>
+                    <div style="white-space: pre-line; font-size: 1.05rem; margin-top: 1rem; line-height: 1.9;">{{ plan.financial_habit }}</div>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="card-custom" style="height: 100%;">
                     <div class="section-icon">🤝</div>
                     <h3>Социална задача</h3>
-                    <p style="font-size: 1.05rem; margin-top: 1rem; line-height: 1.9;">{{ plan.social_plan }}</p>
+                    <div style="white-space: pre-line; font-size: 1.05rem; margin-top: 1rem; line-height: 1.9;">{{ plan.social_plan }}</div>
                 </div>
             </div>
         </div>
