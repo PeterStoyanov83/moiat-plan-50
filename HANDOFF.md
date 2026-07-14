@@ -134,11 +134,24 @@ Then access admin at: `https://web-production-e3b54.up.railway.app/admin/`
 
 ---
 
-## Next Steps (backlog)
-- [x] ~~CRITICAL: Set Edit Port → 8000~~ — superseded by the `ALLOWED_HOSTS` fix; redeploy from `main` and the healthcheck should pass on its own
-- [ ] Redeploy and confirm healthcheck goes green (no dashboard step needed)
-- [ ] Create superuser via Railway shell once live
-- [ ] Add PostgreSQL plugin for persistent data (SQLite is ephemeral on Railway)
-- [ ] Test full user flow on production
-- [ ] Test PDF download (WeasyPrint + pango/cairo already in Dockerfile)
-- [ ] Set `ALLOWED_HOSTS` to exact Railway domain in Variables if getting 400 errors
+## MVP status (2026-07-14) — LIVE
+Renamed to **1Step**; Django package is now `onestep` (gunicorn: `onestep.wsgi`).
+Railway project renamed `mindful-inspiration` → **`1-step App`** (service `web`).
+
+- [x] Knowledge-base-driven plans (movement/nutrition/social/finance by level)
+- [x] Deploy hardening (accept `.railway.app` healthcheck host, prod cookies/HSTS)
+- [x] Committed + pushed to `main`; Railway auto-deployed (Dockerfile)
+- [x] Verified live: 1Step serving, `onestep.wsgi` boots, `/privacy` 200
+- [x] Full prod smoke test: consent gate → plan → **PDF (WeasyPrint) works**
+- [x] Postgres attached (`DATABASE_URL` set) — data persists; migration 0003 applied
+- [x] Superuser already exists on prod (1) → `/admin/` reachable for feedback
+- [x] GDPR: required consent checkbox + `/privacy` notice
+      **TODO before real users:** fill the contact email placeholder in `privacy.html`
+
+### Post-MVP backlog
+- [ ] Fill privacy contact email (currently `[ДОПЪЛНЕТЕ...]`)
+- [ ] Progress tracking (per-plan task check-off) — chosen next feature
+- [ ] Apply Fable 5 design system (accessibility polish for 50+)
+- [ ] Email capture / plan retrieval so a closed tab doesn't lose the plan
+- [ ] Basic funnel analytics (start → finish → PDF)
+- [ ] Automated tests for `profile_logic` + the end-to-end flow
