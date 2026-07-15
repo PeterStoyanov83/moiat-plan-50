@@ -132,6 +132,7 @@ EMAIL_BACKEND = (
 # account and connect Google automatically — no "please log in first" form.
 SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+SOCIALACCOUNT_LOGIN_ON_GET = True            # start Google OAuth on a GET link (no CSRF 403)
 LOGIN_REDIRECT_URL = '/ritual/'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/'
 
