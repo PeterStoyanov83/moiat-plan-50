@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import QuestionnaireResponse, UserPlan, Feedback
+from .models import QuestionnaireResponse, UserPlan, Feedback, StepCompletion
 
 
 @admin.register(QuestionnaireResponse)
@@ -7,6 +7,15 @@ class QuestionnaireResponseAdmin(admin.ModelAdmin):
     list_display = ['id', 'age', 'gender', 'main_goal', 'movement_level', 'energy_level', 'created_at']
     list_filter = ['main_goal', 'movement_level', 'gender', 'working_status']
     search_fields = ['ninety_day_goal', 'health_limitations']
+    readonly_fields = ['created_at']
+    ordering = ['-created_at']
+
+
+@admin.register(StepCompletion)
+class StepCompletionAdmin(admin.ModelAdmin):
+    list_display = ['id', 'response', 'category', 'step_text', 'completed_on', 'created_at']
+    list_filter = ['category', 'completed_on']
+    search_fields = ['step_text']
     readonly_fields = ['created_at']
     ordering = ['-created_at']
 

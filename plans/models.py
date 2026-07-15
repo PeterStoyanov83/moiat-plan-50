@@ -2,6 +2,9 @@ from django.db import models
 
 
 class QuestionnaireResponse(models.Model):
+    first_name = models.CharField(
+        max_length=50, blank=True, verbose_name='Име'
+    )
     age = models.IntegerField(verbose_name='Възраст')
     gender = models.CharField(max_length=20, verbose_name='Пол')
     height = models.IntegerField(verbose_name='Ръст (см)')
@@ -74,3 +77,25 @@ class Feedback(models.Model):
 
     def __str__(self):
         return f'Обратна връзка #{self.pk} за отговор #{self.response_id}'
+
+
+class StepCompletion(models.Model):
+    """One completed daily step. The daily ritual serves steps from the
+    knowledge base one at a time; each 'Направих го' writes a row here.
+    This powers today's count, streaks, and rotation (avoid repeats)."""
+    response = models.ForeignKey(
+        QuestionnaireResponse, on_delete=models.CASCADE, related_name='step_completions'
+    )
+    category = models.CharField(max_length=20, verbose_name='Категория')
+    step_text = models.TextField(verbose_name='Стъпка')
+    completed_on = models.DateField(verbose_name='Дата')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Изпълнена стъпка'
+        verbose_name_plural = 'Изпълнени стъпки'
+        ordering = ['-created_at']
+        indexes = [models.Index(fields=['response', 'completed_on'])]
+
+    def __str__(self):
+        return f'{self.step_text} ({self.completed_on})'
