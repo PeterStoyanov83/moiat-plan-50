@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Напредък — 1Step</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--green:#2E7D32;--green-d:#1B5E20;--cream:#FBF7EE;--cream-soft:#FEFCF7;--ink:#22302A;--muted:#5F6F66;}
+  *{font-family:'Nunito',sans-serif}
+  html,body{background:var(--cream);color:var(--ink);margin:0}
+  .wrap{max-width:28rem;margin:0 auto;min-height:100vh;padding:2.25rem 1.5rem 6.5rem}
+  .card{background:var(--cream-soft);border:1px solid #F2EADB;border-radius:1.75rem;box-shadow:0 8px 30px rgba(34,48,42,.06)}
+  .bar{width:100%;background:var(--green);border-radius:8px 8px 4px 4px;transition:height .6s cubic-bezier(.2,.8,.2,1)}
+  .fadein{animation:fadeUp .6s ease both}@keyframes fadeUp{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+  nav.tab{position:fixed;bottom:0;inset-inline:0;max-width:28rem;margin:0 auto;background:rgba(254,252,247,.92);backdrop-filter:blur(6px);
+    border-top:1px solid #EFE7D7;padding:.6rem 1.5rem;display:flex;justify-content:space-between;font-size:.72rem;font-weight:700;color:var(--muted)}
+  nav.tab a{display:flex;flex-direction:column;align-items:center;gap:.15rem;text-decoration:none;color:inherit}
+  nav.tab a.active{color:var(--green)}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1 class="text-3xl font-extrabold mb-1 fadein">Твоят напредък</h1>
+    <p class="text-[color:var(--muted)] mb-6 fadein">Малките крачки се събират, {{ greeting_name|default:"приятелю" }}.</p>
+
+    <!-- streak + totals -->
+    <div class="grid grid-cols-2 gap-3 mb-4">
+      <div class="card p-5 text-center fadein">
+        <div class="text-5xl font-extrabold text-[color:var(--green)]">{{ streak }}</div>
+        <div class="text-sm font-semibold text-[color:var(--muted)] mt-1">поредни дни 🌱</div>
+      </div>
+      <div class="card p-5 text-center fadein">
+        <div class="text-5xl font-extrabold text-[color:var(--green)]">{{ total }}</div>
+        <div class="text-sm font-semibold text-[color:var(--muted)] mt-1">крачки общо</div>
+      </div>
+    </div>
+
+    <!-- weekly chart -->
+    <div class="card p-5 mb-4 fadein">
+      <p class="font-extrabold mb-4">Последните 7 дни</p>
+      <div class="flex items-end justify-between gap-2" style="height:120px">
+        {% for d in history %}
+        <div class="flex flex-col items-center justify-end h-full" style="flex:1">
+          <span class="text-xs font-bold text-[color:var(--muted)] mb-1">{% if d.count %}{{ d.count }}{% endif %}</span>
+          <div class="bar" style="height:{% widthratio d.count max_count 96 %}px;{% if d.count == 0 %}height:6px;background:#E3DCCB;{% endif %}{% if d.is_today %}background:var(--green-d);{% endif %}"></div>
+          <span class="text-xs font-semibold mt-2 {% if d.is_today %}text-[color:var(--green)]{% else %}text-[color:var(--muted)]{% endif %}">{{ d.label }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- recent steps -->
+    <div class="card p-5 fadein">
+      <p class="font-extrabold mb-3">Последни крачки</p>
+      {% for s in recent %}
+      <div class="flex items-center gap-3 py-2 {% if not forloop.last %}border-b border-[#F2EADB]{% endif %}">
+        <span class="w-7 h-7 rounded-full bg-[#E8F5E9] text-[color:var(--green)] flex items-center justify-center text-sm font-black shrink-0">✓</span>
+        <span class="flex-1 font-semibold">{{ s.step_text }}</span>
+        <span class="text-xs text-[color:var(--muted)] whitespace-nowrap">{{ s.completed_on|date:"d.m" }}</span>
+      </div>
+      {% empty %}
+      <p class="text-[color:var(--muted)]">Още няма отбелязани крачки. Направи първата си днес! 🌿</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <nav class="tab">
+    <a href="{% url 'ritual' %}">
+      <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.3"/><path d="M12 2.5v2M12 19.5v2M4 4l1.5 1.5M18.5 18.5l1.5 1.5M2.5 12h2M19.5 12h2M4 20l1.5-1.5M18.5 5.5l1.5-1.5"/></svg>Днес
+    </a>
+    <a href="{% url 'progress' %}" class="active">
+      <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-7"/><path d="M12 14c-2.6 0-4.6-1.9-4.6-4.6C10.1 9.4 12 11.3 12 14z"/><path d="M12 14c2.6 0 4.6-1.9 4.6-4.6C13.9 9.4 12 11.3 12 14z"/></svg>Напредък
+    </a>
+    {% if plan_id %}
+    <a href="{% url 'result' plan_id %}">
+      <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v16l-7-3-7 3z"/><path d="M9 8h6M9 11h6"/></svg>Пълен план
+    </a>
+    {% endif %}
+    <a href="{% url 'feedback' response_id %}">
+      <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h16v10H9l-5 4z"/><path d="M12 8.6c1-1.1 3-.5 3 .9 0 1.3-1.6 2.3-3 3.1-1.4-.8-3-1.8-3-3.1 0-1.4 2-2 3-.9z" fill="currentColor" stroke="none"/></svg>Отзив
+    </a>
+  </nav>
+</body>
+</html>

@@ -12,6 +12,8 @@ Personalization reuses the existing rule-based helpers — nothing new invented:
 The rule-based ``offer_step`` is the seam where an AI companion later plugs in
 ("днес направи само това").
 """
+from datetime import date
+
 from django.utils import timezone
 
 from .knowledge_base import load_kb, movement_level_for, nutrition_level_for
@@ -135,3 +137,22 @@ def today_progress(response, today=None):
         elif d < expected:
             break
     return {'done_today': done_today, 'streak': streak}
+
+
+BG_WEEKDAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд']
+
+
+def weekly_history(response, days=7, today=None):
+    """Per-day completion counts for the last ``days`` days (oldest first)."""
+    today = today or timezone.localdate()
+    qs = response.step_completions
+    out = []
+    for i in range(days - 1, -1, -1):
+        d = date.fromordinal(today.toordinal() - i)
+        out.append({
+            'date': d,
+            'label': BG_WEEKDAYS[d.weekday()],
+            'count': qs.filter(completed_on=d).count(),
+            'is_today': d == today,
+        })
+    return out

@@ -8,7 +8,7 @@ from django.views.decorators.http import require_POST
 from .forms import QuestionnaireForm, FeedbackForm
 from .models import QuestionnaireResponse, UserPlan, Feedback
 from .profile_logic import determine_profile, generate_plan
-from .step_engine import offer_step, mark_done, today_progress
+from .step_engine import offer_step, mark_done, today_progress, weekly_history
 
 
 def home(request):
@@ -90,6 +90,28 @@ def step_swap(request):
     exclude = [e for e in request.POST.getlist('exclude') if e]
     return JsonResponse({'next': offer_step(response, exclude=exclude),
                          'progress': today_progress(response)})
+
+
+def progress(request):
+    """Напредък — streak, weekly history, and recent completed steps."""
+    response = _session_response(request)
+    if response is None:
+        return redirect('questionnaire')
+    prog = today_progress(response)
+    history = weekly_history(response)
+    plan = getattr(response, 'plan', None)
+    context = {
+        'greeting_name': response.first_name or '',
+        'streak': prog['streak'],
+        'done_today': prog['done_today'],
+        'total': response.step_completions.count(),
+        'history': history,
+        'max_count': max([h['count'] for h in history] + [1]),
+        'recent': response.step_completions.all()[:12],
+        'plan_id': plan.pk if plan else None,
+        'response_id': response.pk,
+    }
+    return render(request, 'plans/progress.html', context)
 
 
 def result(request, plan_id):

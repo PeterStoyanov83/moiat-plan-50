@@ -123,3 +123,17 @@ class RitualFlowTests(TestCase):
         sw = c.post(reverse('step_swap'), {'exclude': step['text']})
         self.assertEqual(sw.status_code, 200)
         self.assertNotEqual(sw.json()['next']['text'], step['text'])
+
+    def test_progress_page_renders_after_a_step(self):
+        c = Client()
+        c.post(reverse('questionnaire'), self.FORM)
+        resp_obj = QuestionnaireResponse.objects.get()
+        step = se.eligible_steps(resp_obj)[0]
+        c.post(reverse('step_done'), {'text': step['text'], 'category': step['category']})
+        r = c.get(reverse('progress'))
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, 'Твоят напредък')
+        self.assertContains(r, step['text'])          # shows in "Последни крачки"
+
+    def test_progress_without_session_redirects(self):
+        self.assertRedirects(Client().get(reverse('progress')), reverse('questionnaire'))
