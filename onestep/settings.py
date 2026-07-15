@@ -112,6 +112,10 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 SOCIALACCOUNT_AUTO_SIGNUP = True
 ACCOUNT_EMAIL_VERIFICATION = 'none'          # Google emails are already verified
+# Google verifies emails, so log the user straight into a matching existing
+# account and connect Google automatically — no "please log in first" form.
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 LOGIN_REDIRECT_URL = '/ritual/'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/'
 
