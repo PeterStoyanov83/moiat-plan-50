@@ -1,8 +1,9 @@
 from datetime import date
 
-from django.test import TestCase
+from django.test import TestCase, Client
+from django.urls import reverse
 
-from .models import QuestionnaireResponse, StepCompletion
+from .models import QuestionnaireResponse, StepCompletion, UserPlan
 from . import step_engine as se
 
 
@@ -70,3 +71,55 @@ class StepEngineTests(TestCase):
         prog = se.today_progress(r, today=t)
         self.assertEqual(prog['done_today'], 2)
         self.assertEqual(prog['streak'], 2)
+
+
+class RitualFlowTests(TestCase):
+    """End-to-end: interview -> session -> ritual -> done/swap endpoints."""
+
+    FORM = dict(
+        first_name='Петър', age=62, gender='жена', height=165, weight=80,
+        working_status='пенсионер', living_status='с_партньор',
+        energy_level='3', sleep_hours='7', health_limitations='',
+        eating_frequency='3', evening_meal_type='лека', main_goal='баланс',
+        movement_level='леко', preferred_movement=['ходене', 'плуване'],
+        joint_pain='не', social_activity='средна', has_hobby='',
+        ninety_day_goal='повече енергия', consent_given='on',
+    )
+
+    def test_questionnaire_redirects_to_ritual_and_sets_session(self):
+        c = Client()
+        resp = c.post(reverse('questionnaire'), self.FORM)
+        self.assertRedirects(resp, reverse('ritual'))
+        self.assertIn('response_id', c.session)
+        self.assertEqual(UserPlan.objects.count(), 1)   # full plan still built
+
+    def test_ritual_shows_a_step_then_done_offers_next(self):
+        c = Client()
+        c.post(reverse('questionnaire'), self.FORM)
+        r = c.get(reverse('ritual'))
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, 'Петър')                 # greeting personalized
+
+        # eligible steps exist for this session's response
+        resp_obj = QuestionnaireResponse.objects.get()
+        step = se.eligible_steps(resp_obj)[0]
+
+        done = c.post(reverse('step_done'), {'text': step['text'], 'category': step['category']})
+        self.assertEqual(done.status_code, 200)
+        data = done.json()
+        self.assertIn('next', data)
+        self.assertEqual(data['progress']['done_today'], 1)
+        self.assertNotEqual(data['next']['text'], step['text'])
+
+    def test_ritual_without_session_redirects_to_questionnaire(self):
+        c = Client()
+        self.assertRedirects(c.get(reverse('ritual')), reverse('questionnaire'))
+
+    def test_swap_returns_different_step(self):
+        c = Client()
+        c.post(reverse('questionnaire'), self.FORM)
+        resp_obj = QuestionnaireResponse.objects.get()
+        step = se.eligible_steps(resp_obj)[0]
+        sw = c.post(reverse('step_swap'), {'exclude': step['text']})
+        self.assertEqual(sw.status_code, 200)
+        self.assertNotEqual(sw.json()['next']['text'], step['text'])

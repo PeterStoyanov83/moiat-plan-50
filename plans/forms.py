@@ -97,6 +97,11 @@ PRICE_CHOICES = [
 
 
 class QuestionnaireForm(forms.ModelForm):
+    first_name = forms.CharField(
+        label='Как да се обръщаме към вас?',
+        max_length=50,
+        widget=forms.TextInput(attrs={'class': 'form-control form-control-lg', 'placeholder': 'напр. Петър'}),
+    )
     age = forms.IntegerField(
         label='Колко години сте?',
         min_value=40, max_value=100,
@@ -205,6 +210,7 @@ class QuestionnaireForm(forms.ModelForm):
     class Meta:
         model = QuestionnaireResponse
         fields = [
+            'first_name',
             'age', 'gender', 'height', 'weight', 'working_status', 'living_status',
             'energy_level', 'sleep_hours', 'health_limitations', 'eating_frequency',
             'evening_meal_type', 'main_goal', 'movement_level', 'preferred_movement',
