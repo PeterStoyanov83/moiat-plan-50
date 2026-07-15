@@ -1,10 +1,12 @@
 from datetime import date
+from unittest import mock
 
 from django.test import TestCase, Client
 from django.urls import reverse
 
 from .models import QuestionnaireResponse, StepCompletion, UserPlan
 from . import step_engine as se
+from . import ai_companion
 
 
 def make_response(**overrides):
@@ -137,3 +139,23 @@ class RitualFlowTests(TestCase):
 
     def test_progress_without_session_redirects(self):
         self.assertRedirects(Client().get(reverse('progress')), reverse('questionnaire'))
+
+
+class AICompanionTests(TestCase):
+    def test_falls_back_to_engine_when_disabled(self):
+        r = make_response()
+        with mock.patch.object(ai_companion, 'enabled', return_value=False):
+            step, message = ai_companion.pick_opening_step(r)
+        self.assertIsNotNone(step)
+        self.assertIn(step['category'], {se.MOVEMENT, se.NUTRITION, se.SOCIAL, se.FINANCE})
+        self.assertIsNone(message)   # no AI line when disabled
+
+    def test_uses_ai_choice_when_enabled(self):
+        r = make_response()
+        with mock.patch.object(ai_companion, 'enabled', return_value=True), \
+             mock.patch.object(ai_companion, '_ai_choose', return_value=(0, 'Днес една малка крачка.')):
+            step, message = ai_companion.pick_opening_step(r)
+        # index 0 of the candidate list, with the AI's warm line
+        candidates = [s for s in se.eligible_steps(r)]
+        self.assertEqual(step['text'], candidates[0]['text'])
+        self.assertEqual(message, 'Днес една малка крачка.')

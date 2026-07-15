@@ -9,6 +9,7 @@ from .forms import QuestionnaireForm, FeedbackForm
 from .models import QuestionnaireResponse, UserPlan, Feedback
 from .profile_logic import determine_profile, generate_plan
 from .step_engine import offer_step, mark_done, today_progress, weekly_history
+from .ai_companion import pick_opening_step
 
 
 def home(request):
@@ -58,11 +59,14 @@ def ritual(request):
     response = _session_response(request)
     if response is None:
         return redirect('questionnaire')
-    step = offer_step(response)
+    # AI companion picks the opening step + a warm line when enabled;
+    # otherwise this falls back to the rule-based engine.
+    step, companion_message = pick_opening_step(response)
     plan = getattr(response, 'plan', None)
     context = {
         'greeting_name': response.first_name or '',
         'initial_step': json.dumps(step, ensure_ascii=False),
+        'companion_message': companion_message or '',
         'progress': json.dumps(today_progress(response)),
         'plan_id': plan.pk if plan else None,
         'response_id': response.pk,

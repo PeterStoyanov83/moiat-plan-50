@@ -75,7 +75,7 @@
       </div>
     </div>
     <p class="fadein d1 text-center text-xl text-[color:var(--muted)] mb-1">Добро утро{% if greeting_name %}, {{ greeting_name }}{% endif %}.</p>
-    <p id="lead" class="fadein d2 text-center text-2xl font-extrabold mb-6">Твоята една крачка сега:</p>
+    <p id="lead" class="fadein d2 text-center text-2xl font-extrabold mb-6">{{ companion_message|default:"Твоята една крачка сега:" }}</p>
 
     <div id="card" class="card in fadein d2"></div>
 
