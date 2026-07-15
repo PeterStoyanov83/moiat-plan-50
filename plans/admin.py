@@ -4,7 +4,7 @@ from .models import QuestionnaireResponse, UserPlan, Feedback, StepCompletion
 
 @admin.register(QuestionnaireResponse)
 class QuestionnaireResponseAdmin(admin.ModelAdmin):
-    list_display = ['id', 'age', 'gender', 'main_goal', 'movement_level', 'energy_level', 'created_at']
+    list_display = ['id', 'first_name', 'user', 'age', 'gender', 'main_goal', 'movement_level', 'energy_level', 'created_at']
     list_filter = ['main_goal', 'movement_level', 'gender', 'working_status']
     search_fields = ['ninety_day_goal', 'health_limitations']
     readonly_fields = ['created_at']

@@ -1,7 +1,12 @@
+from django.conf import settings
 from django.db import models
 
 
 class QuestionnaireResponse(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='questionnaire_responses', verbose_name='Потребител',
+    )
     first_name = models.CharField(
         max_length=50, blank=True, verbose_name='Име'
     )

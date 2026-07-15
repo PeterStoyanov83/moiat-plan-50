@@ -1,4 +1,5 @@
 {% extends 'plans/base.html' %}
+{% load socialaccount %}
 
 {% block title %}1Step – Вашият личен план за активен живот{% endblock %}
 
@@ -19,8 +20,27 @@
             Направи първата крачка
         </a>
         <p style="margin-top: 1.2rem; color: var(--muted); font-size: 0.95rem;">
-            Отнема около 3 минути • Без регистрация • Напълно безплатно
+            Отнема около 3 минути • Напълно безплатно
         </p>
+
+        {% if user.is_authenticated %}
+        <p style="margin-top: 1.5rem; color: var(--muted);">
+            Влезли сте като <strong>{{ user.first_name|default:user.email }}</strong> ·
+            <a href="{% url 'ritual' %}" style="color: var(--primary); font-weight:700;">Към днешната крачка →</a>
+            <form method="post" action="{% url 'account_logout' %}" style="display:inline;">{% csrf_token %}
+                <button type="submit" style="background:none;border:none;color:var(--muted);text-decoration:underline;cursor:pointer;font-size:0.95rem;padding:0;">Изход</button>
+            </form>
+        </p>
+        {% elif google_enabled %}
+        <div style="margin-top: 1.6rem;">
+            <p style="color: var(--muted); margin-bottom:.6rem;">Вече имате профил? Влезте, за да продължите на всяко устройство:</p>
+            <form method="post" action="{% provider_login_url 'google' process='login' %}" style="display:inline;">{% csrf_token %}
+                <button type="submit" style="background:#fff;border:1.5px solid #E7DECC;border-radius:50px;padding:0.7rem 1.6rem;font-weight:700;font-size:1.05rem;cursor:pointer;display:inline-flex;align-items:center;gap:.6rem;">
+                    <span style="font-weight:800;color:#4285F4;">G</span> Влез с Google
+                </button>
+            </form>
+        </div>
+        {% endif %}
     </div>
 </section>
 

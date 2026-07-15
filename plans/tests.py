@@ -159,3 +159,42 @@ class AICompanionTests(TestCase):
         candidates = [s for s in se.eligible_steps(r)]
         self.assertEqual(step['text'], candidates[0]['text'])
         self.assertEqual(message, 'Днес една малка крачка.')
+
+
+class GoogleAccountTests(TestCase):
+    """Signed-in users own their response and get it back on any device."""
+
+    def _user(self):
+        from django.contrib.auth import get_user_model
+        return get_user_model().objects.create_user(
+            username='u1', email='m@example.com', first_name='Мария')
+
+    def test_questionnaire_prefills_name_from_google_profile(self):
+        c = Client()
+        c.force_login(self._user())
+        r = c.get(reverse('questionnaire'))
+        self.assertContains(r, 'value="Мария"')       # first_name prefilled
+
+    def test_response_is_tied_to_user_and_loads_cross_device(self):
+        user = self._user()
+        form = RitualFlowTests.FORM
+        # device A: sign in, complete interview
+        a = Client(); a.force_login(user)
+        a.post(reverse('questionnaire'), form)
+        resp = QuestionnaireResponse.objects.get()
+        self.assertEqual(resp.user, user)              # owned by the account
+
+        # device B: fresh session, same account -> ritual loads their response
+        b = Client(); b.force_login(user)
+        self.assertEqual(b.get(reverse('ritual')).status_code, 200)
+
+    def test_login_claims_anonymous_session_response(self):
+        user = self._user()
+        c = Client()
+        c.post(reverse('questionnaire'), RitualFlowTests.FORM)   # anonymous
+        resp = QuestionnaireResponse.objects.get()
+        self.assertIsNone(resp.user)
+        c.force_login(user)
+        c.get(reverse('ritual'))                                 # triggers claim
+        resp.refresh_from_db()
+        self.assertEqual(resp.user, user)

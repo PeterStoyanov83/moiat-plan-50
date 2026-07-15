@@ -21,7 +21,17 @@ def privacy(request):
 
 
 def _session_response(request):
-    """The QuestionnaireResponse tied to this browser session, or None."""
+    """The QuestionnaireResponse for this visitor.
+
+    Logged-in (Google) users get their most recent response on any device; we
+    also claim an anonymous session response on first login. Anonymous visitors
+    fall back to the session-scoped response.
+    """
+    if request.user.is_authenticated:
+        rid = request.session.get('response_id')
+        if rid:
+            QuestionnaireResponse.objects.filter(pk=rid, user__isnull=True).update(user=request.user)
+        return request.user.questionnaire_responses.order_by('-created_at').first()
     rid = request.session.get('response_id')
     if not rid:
         return None
@@ -32,7 +42,10 @@ def questionnaire(request):
     if request.method == 'POST':
         form = QuestionnaireForm(request.POST)
         if form.is_valid():
-            response = form.save()
+            response = form.save(commit=False)
+            if request.user.is_authenticated:
+                response.user = request.user
+            response.save()
             profile_type = determine_profile(response)
             plan_data = generate_plan(response, profile_type)
             plan = UserPlan.objects.create(
@@ -50,7 +63,11 @@ def questionnaire(request):
             request.session['response_id'] = response.pk
             return redirect('ritual')
     else:
-        form = QuestionnaireForm()
+        # Prefill the name from the Google profile when signed in.
+        initial = {}
+        if request.user.is_authenticated and request.user.first_name:
+            initial['first_name'] = request.user.first_name
+        form = QuestionnaireForm(initial=initial)
     return render(request, 'plans/questionnaire.html', {'form': form})
 
 
