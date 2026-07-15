@@ -1,157 +1,95 @@
-# HANDOFF – 1Step
+# HANDOFF – 1Step („Една крачка")
 
 ## Project
-Django MVP app that generates a personalized 7-day health plan for people 50+.
+Django app for people 50+. **Pivoted** from a static 7-day health plan into a calm
+**daily one-step ritual**: „Една крачка. Всеки ден." — the app shows **one** small
+step at a time; the user does it or swaps for another, and the next is offered.
+
 - **GitHub:** https://github.com/PeterStoyanov83/moiat-plan-50
 - **Live URL:** https://web-production-e3b54.up.railway.app
+- **Railway project:** `1-step App` (service `web`) · Postgres attached
 - **Local path:** `/Users/peterstoyanov/PycharmProjects/PythonProject/moiat_plan_50`
+- **Python package:** `onestep` (gunicorn: `onestep.wsgi:application`). Outer repo dir is still `moiat_plan_50/`.
 
 ---
 
-## Current Status (2026-06-12)
+## Current status (2026-07-15) — LIVE, all shipped on `main`
 
-### ✅ What works
-- Full Django app builds and runs correctly
-- Dockerfile-based Railway deployment
-- `start.sh` runs migrate then gunicorn on `PORT=8000`
-- Static files collected at build time via `CompressedStaticFilesStorage`
-- All migrations apply cleanly
-- Gunicorn starts and listens on `0.0.0.0:8000` confirmed in logs
-- `PORT=8000` set manually in Railway Variables tab
-- Custom Start Command in Railway UI set to `sh start.sh`
+The full ritual redesign + accounts are deployed and verified in production.
 
-### ✅ Healthcheck blocker — ROOT-CAUSED AND FIXED (2026-07-10)
-The real cause was **not** the load-balancer port. With `DEBUG=False` and
-`ALLOWED_HOSTS` set to only the public domain, Django returned **HTTP 400
-(Invalid HTTP_HOST header)** to Railway's healthcheck, which probes `/` with
-`Host: healthcheck.railway.app` — not the public domain. Gunicorn was up, but
-every healthcheck got a non-2xx, so the deploy never went healthy — and because
-it never went healthy, Railway never finalized the domain's target port (which
-is why the manual "Edit Port" step *appeared* to be needed). One root cause.
+### User flow
+1. `/` home → „Направи първата крачка" (or „Влез с Google" / „Вход")
+2. `/questionnaire/` — 18-q interview (+ `first_name`, GDPR consent). Prefilled name if signed in.
+3. → **session** `response_id` + (if logged in) tie to user → redirect to `/ritual/`
+4. `/ritual/` — the daily one-step ritual (single step, „Направих го" / „Покажи ми друга",
+   micro-celebration, then next; „Приключих за днес" ends). Greeting line is AI-written when enabled.
+5. `/ritual/done/`, `/ritual/swap/` — JSON endpoints (step engine).
+6. `/progress/` — Напредък: streak, 7-day chart, recent steps.
+7. `/result/<id>/` — the old full 7-day plan, kept as „Пълен план"; `/download/<id>/` PDF.
+8. `/profile/` — account: name, email, login method, streak/total, links.
+9. `/accounts/*` — allauth: login, signup, password reset/change, email mgmt.
+10. `/admin/` — Django admin (username + password).
 
-**Fix (in `settings.py`, committed):** always append `.railway.app` to
-`ALLOWED_HOSTS` and `https://*.railway.app` to `CSRF_TRUSTED_ORIGINS`,
-regardless of the env var, plus auto-pick up `RAILWAY_PUBLIC_DOMAIN`. Verified
-locally: `healthcheck.railway.app` now accepted, `evil.com` still rejected.
-Also added prod cookie/HSTS hardening — but intentionally **left
-`SECURE_SSL_REDIRECT` off** so the internal (HTTP) healthcheck isn't 301'd.
-
-### Debugging history (so you don't repeat it)
-| Attempt | Problem | Fix |
-|---------|---------|-----|
-| Nixpacks | `nixpacks.toml` silently ignored; pango/cairo missing | Switched to Dockerfile |
-| WhiteNoise crash | `CompressedManifestStaticFilesStorage` needs manifest; collectstatic ran with wrong storage | Use `CompressedStaticFilesStorage` |
-| `$PORT` not expanding | Railway CMD handling didn't shell-expand `$PORT` | Created `start.sh` with explicit `export PORT="${PORT:-8000}"` |
-| ~~Port not routed~~ | *Misdiagnosis.* Real cause: Django 400'd the healthcheck host | Added `.railway.app` to `ALLOWED_HOSTS` in `settings.py` |
-
----
-
-## Architecture
-
+### Architecture (app `plans`)
 ```
-moiat_plan_50/
-├── Dockerfile              # python:3.11-slim, installs pango/cairo for WeasyPrint
-├── start.sh                # entrypoint: migrate + gunicorn on $PORT (fallback 8000)
-├── railway.json            # builder: DOCKERFILE, healthcheck: /
-├── requirements.txt        # Django, WeasyPrint, gunicorn, psycopg2, whitenoise, dj-database-url, python-dotenv
-├── .env                    # local only (gitignored): DEBUG=True, SECRET_KEY, ALLOWED_HOSTS
-├── onestep/                # Django project package (was moiat_plan_50/)
-│   ├── settings.py         # reads from env vars via python-dotenv
-│   ├── wsgi.py             # gunicorn target: onestep.wsgi:application
-│   └── urls.py
-└── plans/                  # main Django app
-    ├── models.py            # QuestionnaireResponse, UserPlan, Feedback
-    ├── forms.py             # Bulgarian labels/choices
-    ├── views.py             # home, questionnaire, result, download_pdf, feedback
-    ├── urls.py
-    ├── admin.py
-    ├── profile_logic.py     # determine_profile() + generate_plan()
-    └── templates/plans/
-        ├── base.html        # Bootstrap 5, green theme
-        ├── home.html
-        ├── questionnaire.html
-        ├── result.html
-        ├── feedback.html
-        ├── feedback_success.html
-        └── pdf_plan.html    # WeasyPrint PDF template
+plans/
+├── models.py           # QuestionnaireResponse(+user FK,+first_name,+consent), UserPlan, Feedback, StepCompletion
+├── knowledge_base.py   # loads data/knowledge_base.json; level mapping (movement/nutrition)
+├── data/knowledge_base.json  # the step library (task pools by level + social/finance)
+├── step_engine.py      # eligible_steps / offer_step / mark_done / today_progress / weekly_history
+├── ai_companion.py     # optional: Claude (Haiku 4.5) picks step + writes line; falls back to engine
+├── profile_logic.py    # determine_profile() + generate_plan() (for the full plan / PDF)
+├── views.py            # home, questionnaire, ritual, step_done, step_swap, progress, profile, result, pdf, feedback, privacy
+├── context_processors.py  # google_flags
+├── forms.py, admin.py, urls.py
+└── templates/plans/    # base.html (calm cream), home, questionnaire, ritual, progress, profile, result, pdf_plan, privacy, feedback*
+templates/allauth/layouts/base.html   # brands all allauth pages (project DIRS override)
+onestep/settings.py     # allauth + google + email/password + email backend + hardening
 ```
 
----
-
-## Railway Environment Variables (set in Variables tab)
-| Key | Value |
-|-----|-------|
-| `SECRET_KEY` | (long random string) |
-| `DEBUG` | `False` |
-| `ALLOWED_HOSTS` | `web-production-e3b54.up.railway.app` |
-| `PORT` | `8000` |
-
-`DATABASE_URL` — not set, app uses SQLite (ephemeral on Railway free tier).
-For persistent data: add PostgreSQL plugin → Railway auto-sets `DATABASE_URL`.
+### Key design: the KB *is* the step library
+`generate_plan()` still builds the full plan/PDF, but the **ritual** re-serves the same
+`knowledge_base.json` task pools **one at a time** via `step_engine`. Levels come from
+`movement_level_for` / `nutrition_level_for`; profile sets category priority.
 
 ---
 
-## Key Technical Decisions
-
-| Decision | Reason |
-|----------|--------|
-| Dockerfile over Nixpacks | Nixpacks ignored `nixpacks.toml`; Dockerfile gives full control over WeasyPrint system libs |
-| `CompressedStaticFilesStorage` (not Manifest) | Manifest variant crashes if collectstatic didn't run with same storage at build time |
-| `start.sh` entrypoint | `$PORT` wasn't shell-expanding in Railway's CMD handling; explicit sh script is bulletproof |
-| SQLite fallback | No PostgreSQL plugin connected yet; settings auto-detect `DATABASE_URL` |
-| `SECRET_KEY=build-only-dummy-key` in Dockerfile | Needed for collectstatic at build time before real env vars are available |
-
----
-
-## User Flow
-1. `/` → home page → "Започни моя план"
-2. `/questionnaire/` → 18-question form
-3. POST → `determine_profile()` → `generate_plan()` → saves `QuestionnaireResponse` + `UserPlan`
-4. `/result/<plan_id>/` → shows profile + 7-day plan
-5. `/download/<plan_id>/` → PDF via WeasyPrint
-6. `/feedback/<response_id>/` → feedback form → `/feedback/success/`
-7. `/admin/` → Django admin (needs superuser)
+## Auth
+- **Google Sign-In** (django-allauth): GET-link login (`SOCIALACCOUNT_LOGIN_ON_GET`),
+  auto-connects to an existing account by verified email (`EMAIL_AUTHENTICATION[_AUTO_CONNECT]`).
+  Redirect URI in Google console: `…/accounts/google/login/callback/`. Client type MUST be **Web application**.
+- **Email + password** (allauth): login by email, signup, **password reset** (needs SMTP), change, email mgmt.
+- **Admin** (`/admin/`) uses username+password, separate from allauth/Google.
+  Superuser: **`Peter`** / peterstoyanov83@gmail.com (temp pwd set 2026-07-15 — CHANGE IT).
+- Logged-in users own their `QuestionnaireResponse` → cross-device; anon session response is claimed on first login.
 
 ---
 
-## Profiles Logic (`plans/profile_logic.py`)
-| Profile | Condition |
-|---------|-----------|
-| Лек старт | `movement_level == 'ниско'` AND `energy_level <= 2` |
-| Отслабване без стрес | `main_goal == 'отслабване'` |
-| Повече енергия | `main_goal == 'енергия'` |
-| Социално активиране | `social_activity == 'ниска'` |
-| Баланс и поддръжка | all other cases |
+## Railway env vars (toggles)
+| Key | Purpose | Set? |
+|-----|---------|------|
+| `SECRET_KEY`, `DEBUG=False`, `ALLOWED_HOSTS`, `PORT=8000` | core | ✅ |
+| `DATABASE_URL` | Postgres (persistent) | ✅ (auto) |
+| `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_SECRET` | shows „Влез с Google" | ✅ set |
+| `ANTHROPIC_API_KEY` | activates AI companion (else rule-based). Opt: `AI_COMPANION_MODEL`, `AI_COMPANION_TIMEOUT` | ✅ set |
+| `EMAIL_HOST` (+ `EMAIL_HOST_USER`/`PASSWORD`/`PORT`, `DEFAULT_FROM_EMAIL`) | **password-reset emails** (SMTP; console fallback) | ⛔ NOT set — reset emails won't deliver until added |
+
+Deploy: push to `main` → Railway auto-builds (Dockerfile) → `start.sh` runs `migrate` + gunicorn.
+Healthcheck fix (historical): `ALLOWED_HOSTS` always appends `.railway.app`; no `SECURE_SSL_REDIRECT` (keeps internal healthcheck 2xx).
 
 ---
 
-## Create Superuser (after deploy is live)
-In Railway → Service → **Deploy** tab → open a terminal shell:
-```bash
-python manage.py createsuperuser
-```
-Then access admin at: `https://web-production-e3b54.up.railway.app/admin/`
+## Migrations
+`0001`–`0003` base + consent · `0004` first_name + StepCompletion · `0005` user FK · `0006` Site name→„1Step".
+
+## Tests
+`plans/tests.py` — 18 tests (step engine, ritual flow, progress, AI-companion fallback+mock, Google account ownership/claim). All green. Run: `python manage.py test plans`.
 
 ---
 
-## MVP status (2026-07-14) — LIVE
-Renamed to **1Step**; Django package is now `onestep` (gunicorn: `onestep.wsgi`).
-Railway project renamed `mindful-inspiration` → **`1-step App`** (service `web`).
-
-- [x] Knowledge-base-driven plans (movement/nutrition/social/finance by level)
-- [x] Deploy hardening (accept `.railway.app` healthcheck host, prod cookies/HSTS)
-- [x] Committed + pushed to `main`; Railway auto-deployed (Dockerfile)
-- [x] Verified live: 1Step serving, `onestep.wsgi` boots, `/privacy` 200
-- [x] Full prod smoke test: consent gate → plan → **PDF (WeasyPrint) works**
-- [x] Postgres attached (`DATABASE_URL` set) — data persists; migration 0003 applied
-- [x] Superuser already exists on prod (1) → `/admin/` reachable for feedback
-- [x] GDPR: required consent checkbox + `/privacy` notice
-      **TODO before real users:** fill the contact email placeholder in `privacy.html`
-
-### Post-MVP backlog
-- [ ] Fill privacy contact email (currently `[ДОПЪЛНЕТЕ...]`)
-- [ ] Progress tracking (per-plan task check-off) — chosen next feature
-- [ ] Apply Fable 5 design system (accessibility polish for 50+)
-- [ ] Email capture / plan retrieval so a closed tab doesn't lose the plan
-- [ ] Basic funnel analytics (start → finish → PDF)
-- [ ] Automated tests for `profile_logic` + the end-to-end flow
+## TODO / backlog
+- [ ] **Fill privacy contact** placeholder in `templates/plans/privacy.html` (`[ДОПЪЛНЕТЕ…]`) before wide launch.
+- [ ] **SMTP** (`EMAIL_HOST` …) so password-reset emails actually send.
+- [ ] **Change the temp admin password** for `Peter`.
+- [ ] Optional: add Profile/Login to the ritual/progress bottom nav (currently header + home only).
+- [ ] Optional: multi-week level progression; reminders/notifications.
