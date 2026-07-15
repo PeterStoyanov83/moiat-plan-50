@@ -6,7 +6,7 @@ from django.template.loader import get_template
 from django.views.decorators.http import require_POST
 
 from .forms import QuestionnaireForm, FeedbackForm
-from .models import QuestionnaireResponse, UserPlan, Feedback
+from .models import QuestionnaireResponse, UserPlan, Feedback, StepCompletion
 from .profile_logic import determine_profile, generate_plan
 from .step_engine import offer_step, mark_done, today_progress, weekly_history
 from .ai_companion import pick_opening_step
@@ -133,6 +133,22 @@ def progress(request):
         'response_id': response.pk,
     }
     return render(request, 'plans/progress.html', context)
+
+
+def profile(request):
+    """Account profile — info, progress, and links to the standard auth actions."""
+    if not request.user.is_authenticated:
+        return redirect('account_login')
+    resp = request.user.questionnaire_responses.order_by('-created_at').first()
+    prog = today_progress(resp) if resp else {'done_today': 0, 'streak': 0}
+    total = StepCompletion.objects.filter(response__user=request.user).count()
+    has_google = request.user.socialaccount_set.filter(provider='google').exists()
+    has_password = request.user.has_usable_password()
+    plan = getattr(resp, 'plan', None) if resp else None
+    return render(request, 'plans/profile.html', {
+        'prog': prog, 'total': total, 'has_google': has_google,
+        'has_password': has_password, 'plan_id': plan.pk if plan else None,
+    })
 
 
 def result(request, plan_id):

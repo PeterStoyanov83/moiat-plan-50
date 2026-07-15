@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block head_title %}1Step{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--green:#2E7D32;--green-d:#1B5E20;--cream:#FBF7EE;--card:#FEFCF7;--ink:#22302A;--muted:#5F6F66;}
+    *{box-sizing:border-box}
+    body{font-family:'Nunito',sans-serif;background:var(--cream);color:var(--ink);margin:0;font-size:1.08rem;line-height:1.7}
+    header{padding:1.1rem 1.5rem}
+    header a.brand{font-weight:800;font-size:1.4rem;color:var(--green);text-decoration:none;display:inline-flex;align-items:center;gap:.5rem}
+    .brand-sun{width:26px;height:26px;border-radius:50%;background:radial-gradient(circle,#FFD180 0%,#FFB74D 60%,rgba(255,183,77,0) 74%)}
+    main{max-width:520px;margin:0 auto;padding:1.5rem 1.5rem 4rem}
+    .card{background:var(--card);border:1px solid #F2EADB;border-radius:22px;box-shadow:0 8px 30px rgba(34,48,42,.07);padding:2rem 1.75rem}
+    h1,h2{font-weight:800;letter-spacing:-.2px;margin-top:0;font-size:1.7rem}
+    label{font-weight:700;display:block;margin:.9rem 0 .35rem}
+    input[type=text],input[type=email],input[type=password]{width:100%;font-size:1.08rem;padding:.7rem 1rem;border:1.5px solid #E7DECC;border-radius:14px;background:#fff;font-family:inherit}
+    input:focus{outline:none;border-color:#4CAF50;box-shadow:0 0 0 .2rem rgba(76,175,80,.15)}
+    button,input[type=submit],.btn,a.button{margin-top:1.2rem;background:var(--green);color:#fff;border:none;border-radius:50px;padding:.85rem 1.6rem;font-size:1.1rem;font-weight:800;cursor:pointer;text-decoration:none;display:inline-block}
+    button:hover,.btn:hover{background:var(--green-d)}
+    a{color:var(--green);font-weight:700}
+    .helptext,small,.text-muted{color:var(--muted);font-size:.92rem;font-weight:400}
+    ul{padding-left:1.1rem}
+    [role=alert],.alert{background:#FFF3E0;border-radius:12px;padding:.7rem 1rem;margin-bottom:.8rem}
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <header><a class="brand" href="/"><span class="brand-sun"></span> 1Step</a></header>
+  <main>
+    {% block body %}
+      <div class="card">{% block content %}{% endblock %}</div>
+    {% endblock %}
+    <p style="text-align:center;margin-top:1.5rem;"><a href="/">← Към началото</a></p>
+  </main>
+  {% block extra_body %}{% endblock %}
+</body>
+</html>
