@@ -136,7 +136,7 @@ class RitualFlowTests(TestCase):
         c.post(reverse('step_done'), {'text': step['text'], 'category': step['category']})
         r = c.get(reverse('progress'))
         self.assertEqual(r.status_code, 200)
-        self.assertContains(r, 'Твоят напредък')
+        self.assertContains(r, 'Твоето дърво')        # living-tree progress screen
         self.assertContains(r, step['text'])          # shows in "Последни крачки"
 
     def test_progress_without_session_redirects(self):

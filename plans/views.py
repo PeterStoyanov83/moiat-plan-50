@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.template.loader import get_template
 from django.views.decorators.http import require_POST
+from django.utils import timezone
 
 from .forms import QuestionnaireForm, FeedbackForm
 from .models import QuestionnaireResponse, UserPlan, Feedback, StepCompletion
@@ -129,18 +130,23 @@ def progress(request):
     if response is None:
         return redirect('questionnaire')
     prog = today_progress(response)
-    history = weekly_history(response)
     plan = getattr(response, 'plan', None)
+    # Living tree: seeded per person, grows with total completed steps.
+    seed = (request.user.email if request.user.is_authenticated and request.user.email
+            else f'resp-{response.pk}')
+    month = timezone.localdate().month
+    season = ('spring' if month in (3, 4, 5) else 'summer' if month in (6, 7, 8)
+              else 'autumn' if month in (9, 10, 11) else 'spring')
     context = {
         'greeting_name': response.first_name or '',
         'streak': prog['streak'],
         'done_today': prog['done_today'],
         'total': response.step_completions.count(),
-        'history': history,
-        'max_count': max([h['count'] for h in history] + [1]),
         'recent': response.step_completions.all()[:12],
         'plan_id': plan.pk if plan else None,
         'response_id': response.pk,
+        'tree_seed': seed,
+        'tree_season': season,
     }
     return render(request, 'plans/progress.html', context)
 
