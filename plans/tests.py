@@ -109,9 +109,11 @@ class RitualFlowTests(TestCase):
         done = c.post(reverse('step_done'), {'text': step['text'], 'category': step['category']})
         self.assertEqual(done.status_code, 200)
         data = done.json()
-        self.assertIn('next', data)
+        self.assertIn('choices', data)                       # next set of options
         self.assertEqual(data['progress']['done_today'], 1)
-        self.assertNotEqual(data['next']['text'], step['text'])
+        texts = [s['text'] for s in data['choices']]
+        self.assertNotIn(step['text'], texts)                # done step not re-offered
+        self.assertLessEqual(len(data['choices']), 3)
 
     def test_ritual_without_session_redirects_to_questionnaire(self):
         c = Client()

@@ -10,42 +10,36 @@
   :root{--green:#2E7D32;--green-d:#1B5E20;--cream:#FBF7EE;--cream-soft:#FEFCF7;--ink:#22302A;--muted:#5F6F66;}
   *{font-family:'Nunito',sans-serif}
   html,body{background:var(--cream);color:var(--ink);margin:0}
-  .wrap{max-width:28rem;margin:0 auto;min-height:100vh;padding:2.5rem 1.5rem 6.5rem;display:flex;flex-direction:column}
-
-  .sun{width:6rem;height:6rem;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  .wrap{max-width:28rem;margin:0 auto;min-height:100vh;padding:2.25rem 1.5rem 6.5rem;display:flex;flex-direction:column}
+  .sun{width:5.5rem;height:5.5rem;border-radius:50%;display:flex;align-items:center;justify-content:center;
     background:radial-gradient(circle at 50% 50%,#FFD180 0%,#FFB74D 55%,rgba(255,183,77,0) 72%);
     animation:rise 1.4s cubic-bezier(.2,.7,.2,1) both, glow 5s ease-in-out infinite 1.4s}
   @keyframes rise{from{transform:translateY(24px) scale(.7);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
   @keyframes glow{0%,100%{filter:drop-shadow(0 0 10px rgba(255,183,77,.35))}50%{filter:drop-shadow(0 0 26px rgba(255,183,77,.6))}}
   .fadein{animation:fadeUp .7s ease both}.d1{animation-delay:.15s}.d2{animation-delay:.3s}
   @keyframes fadeUp{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
-
-  .card{background:var(--cream-soft);border-radius:2rem;padding:2rem 1.5rem;text-align:center;box-shadow:0 8px 30px rgba(34,48,42,.08)}
-  .card.in{animation:cardIn .55s cubic-bezier(.2,.8,.2,1)}
-  @keyframes cardIn{from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:none}}
-  .icoBig{width:5.5rem;height:5.5rem;border-radius:1.5rem;margin:0 auto 1.25rem;display:flex;align-items:center;justify-content:center}
-
-  .btn{width:100%;border:none;border-radius:999px;font-weight:800;cursor:pointer}
-  .btn-done{background:var(--green);color:#fff;font-size:1.4rem;padding:1.1rem;animation:ctaPulse 2.8s ease-in-out infinite}
-  @keyframes ctaPulse{0%,100%{box-shadow:0 10px 24px rgba(46,125,50,.20)}50%{box-shadow:0 14px 32px rgba(46,125,50,.34)}}
-  .btn-done:active{transform:translateY(1px)}
-  .btn-swap{background:transparent;color:var(--muted);font-size:1.05rem;padding:.85rem;font-weight:700}
-
+  .opt{width:100%;display:flex;align-items:center;gap:1rem;background:var(--cream-soft);border:1px solid #F2EADB;
+    border-radius:1.5rem;padding:1.1rem 1.15rem;text-align:left;cursor:pointer;box-shadow:0 6px 22px rgba(34,48,42,.06);
+    transition:transform .2s,box-shadow .2s,opacity .35s}
+  .opt:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(34,48,42,.10)}
+  .opt:active{transform:scale(.99)}
+  .opt.in{animation:cardIn .5s cubic-bezier(.2,.8,.2,1) both}
+  @keyframes cardIn{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:none}}
+  .letter{width:2rem;height:2rem;flex:none;border-radius:50%;background:#EAF4EB;color:var(--green);
+    font-weight:800;display:flex;align-items:center;justify-content:center}
+  .ico{width:3.2rem;height:3.2rem;flex:none;border-radius:1rem;display:flex;align-items:center;justify-content:center}
+  .btn-swap{background:transparent;color:var(--muted);font-size:1.05rem;padding:.85rem;font-weight:700;border:none;cursor:pointer;width:100%}
   #flash{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(251,247,238,.92);backdrop-filter:blur(3px);z-index:40;text-align:center}
   #flash.show{display:flex;animation:fadeUp .35s ease both}
-  .pop{animation:pop .6s cubic-bezier(.2,1.5,.4,1) both}
-  @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+  .pop{animation:pop .6s cubic-bezier(.2,1.5,.4,1) both}@keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
   #final{display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;text-align:center}
   #final.show{display:flex}
   .confetti{position:fixed;top:-16px;width:9px;height:14px;border-radius:2px;animation:fall linear forwards;z-index:50}
   @keyframes fall{to{transform:translateY(104vh) rotate(540deg)}}
-
   nav.tab{position:fixed;bottom:0;inset-inline:0;max-width:28rem;margin:0 auto;background:rgba(254,252,247,.92);backdrop-filter:blur(6px);
     border-top:1px solid #EFE7D7;padding:.6rem 1.5rem;display:flex;justify-content:space-between;font-size:.72rem;font-weight:700;color:var(--muted)}
   nav.tab a{display:flex;flex-direction:column;align-items:center;gap:.15rem;text-decoration:none;color:inherit}
   nav.tab a.active{color:var(--green)}
-
-  /* living icons */
   svg [class]{transform-box:fill-box}
   .rays{transform-origin:center;animation:spin 22s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
   .wave{transform-origin:center;animation:sip 3.2s ease-in-out infinite}@keyframes sip{0%,100%{transform:translateY(0)}45%,65%{transform:translateY(4px)}}
@@ -57,7 +51,6 @@
   .stretchy{transform-origin:center bottom;animation:sway 2.4s ease-in-out infinite}@keyframes sway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
   .leaf{transform-origin:bottom left;animation:leafsway 3s ease-in-out infinite}@keyframes leafsway{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
   .moon{transform-origin:center;animation:breathe 3s ease-in-out infinite}@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
-  .zzz{animation:tw 1.8s ease-in-out infinite}
   .coin{transform-origin:center;animation:flip 4s ease-in-out infinite}@keyframes flip{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.2)}}
   .cheer{transform-origin:center bottom;animation:jump 1.1s ease-in-out infinite}@keyframes jump{0%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}55%{transform:translateY(0)}}
   .spark{transform-origin:center;animation:tw 1.1s ease-in-out infinite}@keyframes tw{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
@@ -66,23 +59,18 @@
 </head>
 <body>
   <div class="wrap" id="mainWrap">
-    <div class="flex justify-center mb-5">
+    <div class="flex justify-center mb-4">
       <div class="sun">
-        <svg class="w-14 h-14 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <svg class="w-12 h-12 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <g class="rays"><path d="M12 1.6v2.4M12 19.9v2.5M3.5 3.5l1.7 1.7M18.7 18.7l1.7 1.7M1.6 12h2.4M20 12h2.4M3.5 20.5l1.7-1.7M18.7 5.3l1.7-1.7"/></g>
           <circle cx="12" cy="12" r="5"/><circle cx="10.3" cy="11.6" r=".55" fill="currentColor" stroke="none"/><circle cx="13.7" cy="11.6" r=".55" fill="currentColor" stroke="none"/><path d="M10.1 13.4c.9.8 2.9.8 3.8 0"/>
         </svg>
       </div>
     </div>
     <p class="fadein d1 text-center text-xl text-[color:var(--muted)] mb-1">Добро утро{% if greeting_name %}, {{ greeting_name }}{% endif %}.</p>
-    <p id="lead" class="fadein d2 text-center text-2xl font-extrabold mb-6">{{ companion_message|default:"Твоята една крачка сега:" }}</p>
+    <p id="lead" class="fadein d2 text-center text-2xl font-extrabold mb-5">{{ companion_message|default:"Избери своята крачка за днес:" }}</p>
 
-    <div id="card" class="card in fadein d2"></div>
-
-    <div class="mt-6 space-y-2">
-      <button id="doneBtn" class="btn btn-done">Направих го&nbsp;✓</button>
-      <button id="swapBtn" class="btn btn-swap">Не тази? Покажи ми друга&nbsp;↻</button>
-    </div>
+    <div id="choices" class="space-y-3"></div>
 
     <div class="mt-auto pt-8 text-center">
       <p id="counter" class="text-[color:var(--muted)] text-sm font-semibold"></p>
@@ -90,7 +78,6 @@
     </div>
   </div>
 
-  <!-- micro celebration between steps -->
   <div id="flash">
     <div class="pop text-[color:var(--green)]">
       <svg class="w-24 h-24 mx-auto mb-3" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -102,7 +89,6 @@
     <p class="pop text-lg text-[color:var(--muted)] mt-1">Готово. Гордей се със себе си.</p>
   </div>
 
-  <!-- final done screen -->
   <div id="final" class="wrap">
     <div class="pop text-[color:var(--green)]">
       <svg class="w-28 h-28 mx-auto mb-4" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -116,99 +102,58 @@
   </div>
 
   <nav class="tab">
-    <a href="{% url 'ritual' %}" class="active">
-      <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.3"/><path d="M12 2.5v2M12 19.5v2M4 4l1.5 1.5M18.5 18.5l1.5 1.5M2.5 12h2M19.5 12h2M4 20l1.5-1.5M18.5 5.5l1.5-1.5"/></svg>Днес
-    </a>
-    <a href="{% url 'progress' %}">
-      <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-7"/><path d="M12 14c-2.6 0-4.6-1.9-4.6-4.6C10.1 9.4 12 11.3 12 14z"/><path d="M12 14c2.6 0 4.6-1.9 4.6-4.6C13.9 9.4 12 11.3 12 14z"/></svg>Напредък
-    </a>
-    {% if plan_id %}
-    <a href="{% url 'result' plan_id %}">
-      <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v16l-7-3-7 3z"/><path d="M9 8h6M9 11h6"/></svg>Пълен план
-    </a>
-    {% endif %}
-    <a href="{% url 'feedback' response_id %}">
-      <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h16v10H9l-5 4z"/><path d="M12 8.6c1-1.1 3-.5 3 .9 0 1.3-1.6 2.3-3 3.1-1.4-.8-3-1.8-3-3.1 0-1.4 2-2 3-.9z" fill="currentColor" stroke="none"/></svg>Отзив
-    </a>
+    <a href="{% url 'ritual' %}" class="active"><svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.3"/><path d="M12 2.5v2M12 19.5v2M4 4l1.5 1.5M18.5 18.5l1.5 1.5M2.5 12h2M19.5 12h2M4 20l1.5-1.5M18.5 5.5l1.5-1.5"/></svg>Днес</a>
+    <a href="{% url 'progress' %}"><svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-7"/><path d="M12 14c-2.6 0-4.6-1.9-4.6-4.6C10.1 9.4 12 11.3 12 14z"/><path d="M12 14c2.6 0 4.6-1.9 4.6-4.6C13.9 9.4 12 11.3 12 14z"/></svg>Напредък</a>
+    {% if plan_id %}<a href="{% url 'result' plan_id %}"><svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v16l-7-3-7 3z"/><path d="M9 8h6M9 11h6"/></svg>Пълен план</a>{% endif %}
+    <a href="{% url 'profile' %}"><svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.6 3-6 7-6s7 2.4 7 6"/></svg>Профил</a>
   </nav>
 
 <script>
-  const CSRF='{{ csrf_token }}';
-  const DONE_URL="{% url 'step_done' %}", SWAP_URL="{% url 'step_swap' %}";
-  const INITIAL={{ initial_step|safe }};
+  const CSRF='{{ csrf_token }}', DONE_URL="{% url 'step_done' %}";
+  const INITIAL={{ initial_choices|safe }};
   let PROGRESS={{ progress|safe }};
-  let CURRENT=null;
-
+  const LETTERS=['А','Б','В'];
   const ICON={
-    water:`<svg class="w-9 h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 5h11l-1 12.6A2.2 2.2 0 0 1 14.3 19.6H9.7a2.2 2.2 0 0 1-2.2-2z"/><path class="wave" d="M7 11h10"/><circle class="drip" cx="12" cy="3.4" r=".9" fill="currentColor" stroke="none"/></svg>`,
-    walk:`<svg class="w-9 h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><g class="walker"><circle cx="12" cy="4" r="2"/><path d="M12 6.2V13"/><path class="arm" d="M12 8.6l3 2"/><path class="leg1" d="M12 13l3 6.4"/><path class="leg2" d="M12 13l-3 6.4"/></g></svg>`,
-    friend:`<svg class="w-9 h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.6" cy="10" r="2.4"/><circle cx="16.4" cy="10" r="2.4"/><path d="M3.5 20c0-2.8 1.8-4.6 4.1-4.6s4.1 1.8 4.1 4.6"/><path d="M12.3 20c0-2.8 1.8-4.6 4.1-4.6s4.1 1.8 4.1 4.6"/><path class="heart" d="M12 3.1c.8-1.1 2.6-.5 2.6.8 0 1.1-1.5 2-2.6 2.8-1.1-.8-2.6-1.7-2.6-2.8 0-1.3 1.8-1.9 2.6-.8z" fill="currentColor" stroke="none"/></svg>`,
-    stretch:`<svg class="w-9 h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><g class="stretchy"><circle cx="12" cy="4.5" r="2"/><path d="M12 6.6v7"/><path d="M12 8.6l-3.4-2.6M12 8.6l3.4-2.6"/><path d="M12 13.6l-3 6M12 13.6l3 6"/></g></svg>`,
-    salad:`<svg class="w-9 h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path class="leaf" d="M5 19c0-8 6-14 14-14 0 8-6 14-14 14z"/><path d="M8.5 15.5c3-3 5.5-5 8.5-7"/></svg>`,
-    sleep:`<svg class="w-9 h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path class="moon" d="M20 14.5A8 8 0 1 1 9.5 4 6.5 6.5 0 0 0 20 14.5z"/><path class="zzz" d="M15 3.5h3l-3 3h3" stroke-width="1.2"/></svg>`,
-    coin:`<svg class="w-9 h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><g class="coin"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M9.6 10c0-1 1-1.5 2.4-1.5s2.4.5 2.4 1.5-1 1.4-2.4 1.4-2.4.5-2.4 1.5 1 1.5 2.4 1.5 2.4-.5 2.4-1.5"/></g></svg>`,
+    water:`<svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 5h11l-1 12.6A2.2 2.2 0 0 1 14.3 19.6H9.7a2.2 2.2 0 0 1-2.2-2z"/><path class="wave" d="M7 11h10"/><circle class="drip" cx="12" cy="3.4" r=".9" fill="currentColor" stroke="none"/></svg>`,
+    walk:`<svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><g class="walker"><circle cx="12" cy="4" r="2"/><path d="M12 6.2V13"/><path class="arm" d="M12 8.6l3 2"/><path class="leg1" d="M12 13l3 6.4"/><path class="leg2" d="M12 13l-3 6.4"/></g></svg>`,
+    friend:`<svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.6" cy="10" r="2.4"/><circle cx="16.4" cy="10" r="2.4"/><path d="M3.5 20c0-2.8 1.8-4.6 4.1-4.6s4.1 1.8 4.1 4.6"/><path d="M12.3 20c0-2.8 1.8-4.6 4.1-4.6s4.1 1.8 4.1 4.6"/><path class="heart" d="M12 3.1c.8-1.1 2.6-.5 2.6.8 0 1.1-1.5 2-2.6 2.8-1.1-.8-2.6-1.7-2.6-2.8 0-1.3 1.8-1.9 2.6-.8z" fill="currentColor" stroke="none"/></svg>`,
+    stretch:`<svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><g class="stretchy"><circle cx="12" cy="4.5" r="2"/><path d="M12 6.6v7"/><path d="M12 8.6l-3.4-2.6M12 8.6l3.4-2.6"/><path d="M12 13.6l-3 6M12 13.6l3 6"/></g></svg>`,
+    salad:`<svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path class="leaf" d="M5 19c0-8 6-14 14-14 0 8-6 14-14 14z"/><path d="M8.5 15.5c3-3 5.5-5 8.5-7"/></svg>`,
+    sleep:`<svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path class="moon" d="M20 14.5A8 8 0 1 1 9.5 4 6.5 6.5 0 0 0 20 14.5z"/><path class="zzz" d="M15 3.5h3l-3 3h3" stroke-width="1.2"/></svg>`,
+    coin:`<svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><g class="coin"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M9.6 10c0-1 1-1.5 2.4-1.5s2.4.5 2.4 1.5-1 1.4-2.4 1.4-2.4.5-2.4 1.5 1 1.5 2.4 1.5 2.4-.5 2.4-1.5"/></g></svg>`,
   };
-  const META={
-    water:['#E7F1F6','#2F6E8F'], walk:['#E8F5E9','#2E7D32'], stretch:['#EDE7F6','#6A5AA0'],
-    salad:['#E9F4EA','#3E8E41'], friend:['#FCEFDD','#C57A1E'], sleep:['#E7ECF6','#41689E'], coin:['#F7EFD6','#A5811F'],
-  };
+  const META={water:['#E7F1F6','#2F6E8F'],walk:['#E8F5E9','#2E7D32'],stretch:['#EDE7F6','#6A5AA0'],salad:['#E9F4EA','#3E8E41'],friend:['#FCEFDD','#C57A1E'],sleep:['#E7ECF6','#41689E'],coin:['#F7EFD6','#A5811F']};
 
-  const card=document.getElementById('card'), lead=document.getElementById('lead'), counter=document.getElementById('counter');
-
-  function updateProgress(p){
-    PROGRESS=p;
-    let t=`Днес: ${p.done_today} ${p.done_today===1?'крачка':'крачки'} · всяка е победа.`;
-    if(p.streak>1) t=`Днес: ${p.done_today} ${p.done_today===1?'крачка':'крачки'} · ${p.streak} поредни дни 🌱`;
-    counter.textContent=t;
+  const box=document.getElementById('choices'), lead=document.getElementById('lead'), counter=document.getElementById('counter');
+  function updateProgress(p){PROGRESS=p;let t=`Днес: ${p.done_today} ${p.done_today===1?'крачка':'крачки'} · всяка е победа.`;if(p.streak>1)t=`Днес: ${p.done_today} · ${p.streak} поредни дни 🌱`;counter.textContent=t;}
+  function render(choices){
+    box.innerHTML='';
+    choices.forEach((s,i)=>{
+      const m=META[s.icon]||META.walk;
+      const el=document.createElement('button');
+      el.className='opt in';el.style.animationDelay=(i*.08)+'s';
+      el.innerHTML=`<span class="letter">${LETTERS[i]||''}</span>
+        <span class="ico" style="background:${m[0]};color:${m[1]}">${ICON[s.icon]||ICON.walk}</span>
+        <span class="flex-1 text-lg font-bold leading-snug">${s.text}</span>`;
+      el.onclick=()=>choose(s);
+      box.appendChild(el);
+    });
   }
-  function setStep(step){
-    CURRENT=step;
-    const m=META[step.icon]||META.walk;
-    card.innerHTML=`<div class="icoBig" style="background:${m[0]};color:${m[1]}">${ICON[step.icon]||ICON.walk}</div>
-      <p class="text-2xl font-extrabold leading-snug">${step.text}</p>`;
-    card.classList.remove('in');void card.offsetWidth;card.classList.add('in');
-  }
-  async function post(url,body){
-    const r=await fetch(url,{method:'POST',headers:{'X-CSRFToken':CSRF,'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(body)});
-    return r.json();
-  }
-  function finish(msg){
-    document.getElementById('mainWrap').style.display='none';
-    const f=document.getElementById('final');f.classList.add('show');
-    if(msg)document.getElementById('finalMsg').innerHTML=msg;
-    burst();
-  }
-  async function done(){
-    if(!CURRENT)return;
-    const data=await post(DONE_URL,{text:CURRENT.text,category:CURRENT.category});
+  async function post(url,body){const r=await fetch(url,{method:'POST',headers:{'X-CSRFToken':CSRF,'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(body)});return r.json();}
+  function finish(msg){document.getElementById('mainWrap').style.display='none';const f=document.getElementById('final');f.classList.add('show');if(msg)document.getElementById('finalMsg').innerHTML=msg;burst();}
+  async function choose(s){
+    const data=await post(DONE_URL,{text:s.text,category:s.category});
     const flash=document.getElementById('flash');flash.classList.add('show');
     setTimeout(()=>{
-      flash.classList.remove('show');
-      updateProgress(data.progress);
-      if(data.next){lead.textContent='Готово! Ако искаш — още една крачка:';setStep(data.next);}
+      flash.classList.remove('show');updateProgress(data.progress);
+      if(data.choices&&data.choices.length){lead.textContent='Готово! Ето следващите крачки:';render(data.choices);}
       else finish('Направи всичките си крачки за днес!<br>Гордеем се с теб.');
-    },1300);
+    },1250);
   }
-  async function swap(){
-    if(!CURRENT)return;
-    const data=await post(SWAP_URL,{exclude:CURRENT.text});
-    if(data.next)setStep(data.next); else finish('Засега няма повече крачки.<br>До утре!');
-  }
-  function burst(){
-    const cols=['#4CAF50','#FFB74D','#4A90A4','#A5D6A7','#FFE0B2'];
-    for(let i=0;i<70;i++){const p=document.createElement('div');p.className='confetti';
-      p.style.left=Math.random()*100+'vw';p.style.background=cols[i%cols.length];
-      p.style.animationDuration=(2.4+Math.random()*1.8)+'s';p.style.animationDelay=(Math.random()*.6)+'s';
-      document.body.appendChild(p);setTimeout(()=>p.remove(),4800);}
-  }
-
-  document.getElementById('doneBtn').addEventListener('click',done);
-  document.getElementById('swapBtn').addEventListener('click',swap);
+  function burst(){const cols=['#4CAF50','#FFB74D','#4A90A4','#A5D6A7','#FFE0B2'];for(let i=0;i<70;i++){const p=document.createElement('div');p.className='confetti';p.style.left=Math.random()*100+'vw';p.style.background=cols[i%cols.length];p.style.animationDuration=(2.4+Math.random()*1.8)+'s';p.style.animationDelay=(Math.random()*.6)+'s';document.body.appendChild(p);setTimeout(()=>p.remove(),4800);}}
   document.getElementById('stopBtn').addEventListener('click',()=>finish(PROGRESS.done_today?null:'Дори че си тук — това е крачка.<br>До утре!'));
-
   updateProgress(PROGRESS);
-  if(INITIAL) setStep(INITIAL);
-  else finish(PROGRESS.done_today?'Направи всичките си крачки за днес!<br>Гордеем се с теб.':null);
+  if(INITIAL&&INITIAL.length)render(INITIAL); else finish(PROGRESS.done_today?'Направи всичките си крачки за днес!<br>Гордеем се с теб.':null);
 </script>
 </body>
 </html>

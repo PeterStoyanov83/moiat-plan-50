@@ -8,7 +8,7 @@ from django.views.decorators.http import require_POST
 from .forms import QuestionnaireForm, FeedbackForm
 from .models import QuestionnaireResponse, UserPlan, Feedback, StepCompletion
 from .profile_logic import determine_profile, generate_plan
-from .step_engine import offer_step, mark_done, today_progress, weekly_history
+from .step_engine import offer_step, offer_choices, mark_done, today_progress, weekly_history
 from .ai_companion import pick_opening_step
 
 
@@ -76,19 +76,28 @@ def ritual(request):
     response = _session_response(request)
     if response is None:
         return redirect('questionnaire')
-    # AI companion picks the opening step + a warm line when enabled;
-    # otherwise this falls back to the rule-based engine.
+    # AI companion recommends option A + a warm line (when enabled); the other
+    # two options come from the rule-based engine. Falls back cleanly.
     step, companion_message = pick_opening_step(response)
+    choices = _build_choices(response, step)
     plan = getattr(response, 'plan', None)
     context = {
         'greeting_name': response.first_name or '',
-        'initial_step': json.dumps(step, ensure_ascii=False),
+        'initial_choices': json.dumps(choices, ensure_ascii=False),
         'companion_message': companion_message or '',
         'progress': json.dumps(today_progress(response)),
         'plan_id': plan.pk if plan else None,
         'response_id': response.pk,
     }
     return render(request, 'plans/ritual.html', context)
+
+
+def _build_choices(response, first=None):
+    """Up to 3 options; if ``first`` given (AI pick), it leads the list."""
+    if first:
+        rest = offer_choices(response, n=2, exclude=[first['text']])
+        return [first] + rest
+    return offer_choices(response, n=3)
 
 
 @require_POST
@@ -100,7 +109,8 @@ def step_done(request):
     category = request.POST.get('category', '').strip()
     if text:
         mark_done(response, text, category)
-    return JsonResponse({'next': offer_step(response), 'progress': today_progress(response)})
+    # Offer the next set of options (rule-based — keeps each tap instant).
+    return JsonResponse({'choices': _build_choices(response), 'progress': today_progress(response)})
 
 
 @require_POST

@@ -12,6 +12,7 @@ Personalization reuses the existing rule-based helpers — nothing new invented:
 The rule-based ``offer_step`` is the seam where an AI companion later plugs in
 ("днес направи само това").
 """
+import random
 from datetime import date
 
 from django.utils import timezone
@@ -109,6 +110,36 @@ def offer_step(response, exclude=None, today=None):
     # but is reproducible within a request.
     seed = (response.pk or 0) + today.toordinal() + len(done)
     return pool[seed % len(pool)]
+
+
+def offer_choices(response, n=3, exclude=None, today=None):
+    """Return up to ``n`` distinct step options (A/B/C) to pick from today.
+
+    Skips steps done today and any in ``exclude``; prefers variety across
+    categories. Stable within a day, advances as steps get done.
+    """
+    today = today or timezone.localdate()
+    exclude = set(exclude or [])
+    done = _completed_today_texts(response, today)
+    pool = [s for s in eligible_steps(response) if s['text'] not in done and s['text'] not in exclude]
+    if not pool:
+        return []
+    rng = random.Random((response.pk or 0) + today.toordinal() + len(done))
+    # spread across categories: one per category first, then fill.
+    by_cat = {}
+    for s in pool:
+        by_cat.setdefault(s['category'], []).append(s)
+    for lst in by_cat.values():
+        rng.shuffle(lst)
+    chosen, cats = [], list(by_cat.keys())
+    rng.shuffle(cats)
+    for c in cats:
+        if len(chosen) < n and by_cat[c]:
+            chosen.append(by_cat[c].pop(0))
+    leftovers = [s for lst in by_cat.values() for s in lst]
+    rng.shuffle(leftovers)
+    chosen += leftovers[: max(0, n - len(chosen))]
+    return chosen[:n]
 
 
 def mark_done(response, step_text, category, today=None):
