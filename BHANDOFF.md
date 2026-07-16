@@ -87,3 +87,21 @@ Funnel + retention + willingness-to-pay. Data is in Django admin (`/admin/`):
 ## Stakeholders / contacts
 - Founder: Peter Stoyanov (peterstoyanov83@gmail.com)
 - **[ФОУНДЪР]** collaborators, advisors, pilot partners.
+
+---
+
+## Latest (2026-07-16) — product/UX direction
+- **Philosophy locked as "personal life companion"** (not tracker): calm, warm, one small
+  step a day, never guilt. Full brief in `design/REDESIGN_BRIEF.md`.
+- **Ritual UX:** the daily step is now **one step offered as 3 choices (А/Б/В)** — agency
+  without overwhelm. User picks one, does it, gets the next 3.
+- **Progress = a Living Tree** that grows with every completed step (metaphor for personal
+  growth, replaces charts/points). Emotional centerpiece for retention & "this is *my* tree".
+- **Accounts shipped** (Google + email/password) → cross-device, returning users, and the
+  data foundation for personalization and any future paid tier.
+- **Retention hypothesis to watch:** does the tree + one-step ritual pull people back
+  day-over-day? That's the core concept validation. Metrics still in `/admin/`; funnel
+  analytics still a gap.
+- **[ФОУНДЪР] decisions still open:** one-vs-three resolved (3 options). Still: reflection
+  storage (recommend store), raster illustration pipeline (recommend stay SVG/tree for now),
+  price point + first paid test, first GTM channel.

@@ -93,3 +93,25 @@ Healthcheck fix (historical): `ALLOWED_HOSTS` always appends `.railway.app`; no 
 - [ ] **Change the temp admin password** for `Peter`.
 - [ ] Optional: add Profile/Login to the ritual/progress bottom nav (currently header + home only).
 - [ ] Optional: multi-week level progression; reminders/notifications.
+
+---
+
+## Latest (2026-07-16)
+- **Ritual = one step as 3 options (А/Б/В).** `step_engine.offer_choices()` returns
+  up to 3 distinct eligible steps (variety across categories); ritual shows them as
+  A/B/C cards — pick one → mark done → next 3. When AI is on, option **А** is the
+  companion's pick. `views._build_choices()`; `step_done` now returns `{choices, progress}`
+  (not `next`). Swap endpoint kept but unused by the UI.
+- **Progress = Living Tree** (Fable's engine). `plans/static/plans/tree-engine.js`
+  (vendored, framework-agnostic canvas). `progress.html` → „Твоето дърво": seeded per
+  user (email/resp id), grows with **total StepCompletion count** (`completedActions`),
+  season from month, personality `calm`. Replaced the 7-day bar chart; streak/total/recent kept.
+  Source demo: `/Users/peterstoyanov/Progress Tree/` (README = algorithm/API).
+- **Full auth live**: Google + **email/password login, signup, password reset/change,
+  email mgmt** (allauth, branded via `templates/allauth/layouts/base.html`). `/profile/`
+  page. Email backend from env (SMTP when `EMAIL_HOST` set, else console — reset emails
+  need SMTP). Admin superuser `Peter` (temp pwd set — change it).
+- **Design brief:** `design/REDESIGN_BRIEF.md` (project-grounded "personal life companion"
+  transformation). Next builds from it: conversational onboarding; tree personality from
+  profile; reflection prompt (+storage decision).
+- No new migrations since `0006` (choices + tree are logic/static only). Tests: 18, green.
