@@ -50,16 +50,34 @@ def card(action, level):
 
 def user_contraindications(response):
     """Derive contraindication tags from the questionnaire. Conservative: when
-    in doubt, protect the user (substitute a gentler action, never harm)."""
+    in doubt, protect the user (substitute a gentler action, never harm).
+
+    Keyword-based inference over the free-text `health_limitations` (+ the
+    `joint_pain` field). Every tag here must be one an ActionDef can carry so the
+    gating in `_resolve_safe` can act on it — see bos/engines/02-knowledge-engine.md.
+    """
     tags = set()
     jp = (getattr(response, 'joint_pain', '') or '').strip().lower()
     if jp and jp not in ('не', 'няма', 'no', 'none', '-'):
         tags.add('severe_joint_pain')
     hl = (getattr(response, 'health_limitations', '') or '').lower()
-    if any(k in hl for k in ('стави', 'колян', 'гръб', 'joint', 'knee', 'back')):
+
+    def has(*keys):
+        return any(k in hl for k in keys)
+
+    if has('стави', 'колян', 'гръб', 'joint', 'knee', 'back'):
         tags.add('severe_joint_pain')
-    if any(k in hl for k in ('травма', 'контузия', 'injury', 'операция')):
+    if has('травма', 'контузия', 'счупен', 'операция', 'injury', 'surgery'):
         tags.add('acute_injury')
+    if has('сърц', 'сърдечн', 'инфаркт', 'стенокарди', 'аритми', 'кръвно',
+           'налягане', 'хипертони', 'heart', 'cardiac', 'hypertension'):
+        tags.add('cardiac')
+    if has('световъртеж', 'замайв', 'замая', 'вертиго', 'залитан', 'падан',
+           'равновеси', 'dizzy', 'vertigo', 'balance'):
+        tags.add('balance_issues')
+    if has('астма', 'дишан', 'задух', 'бял дроб', 'хобб', 'respiratory',
+           'asthma', 'copd', 'breath'):
+        tags.add('respiratory')
     return tags
 
 

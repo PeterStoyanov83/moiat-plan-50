@@ -206,14 +206,14 @@ class KnowledgeLibraryTests(TestCase):
     """Knowledge Engine (bos/engines/02): the action library and its metadata contract."""
     VALID_CATEGORIES = {'movement', 'nutrition', 'hydration', 'sleep', 'social', 'mind', 'financial'}
     # Only tags daily.py::user_contraindications() can actually infer today.
-    INFERRABLE_CONTRA = {'severe_joint_pain', 'acute_injury'}
+    INFERRABLE_CONTRA = {'severe_joint_pain', 'acute_injury', 'cardiac', 'balance_issues', 'respiratory'}
 
     def setUp(self):
         from .models import ActionDef
         self.actions = list(ActionDef.objects.all())
 
     def test_library_has_grown(self):
-        self.assertGreaterEqual(len(self.actions), 40)   # 8 starters + expansion
+        self.assertGreaterEqual(len(self.actions), 95)   # ~100 across all categories
 
     def test_every_action_has_full_metadata(self):
         # Constitution: "no action without metadata" + "always explain WHY".
@@ -235,3 +235,25 @@ class KnowledgeLibraryTests(TestCase):
         for a in self.actions:
             for c in (a.contraindications or []):
                 self.assertIn(c, self.INFERRABLE_CONTRA, f'{a.slug}: contraindication "{c}" not inferrable')
+
+    def test_refined_contraindication_inference(self):
+        from .daily import user_contraindications
+
+        def tags(hl='', jp='не'):
+            return user_contraindications(make_response(health_limitations=hl, joint_pain=jp))
+
+        self.assertIn('cardiac', tags(hl='имам високо кръвно налягане'))
+        self.assertIn('cardiac', tags(hl='сърдечно заболяване'))
+        self.assertIn('balance_issues', tags(hl='получавам световъртеж'))
+        self.assertIn('respiratory', tags(hl='имам астма'))
+        self.assertIn('severe_joint_pain', tags(hl='болки в коляното'))
+        self.assertIn('severe_joint_pain', tags(jp='да, в коленете'))
+        self.assertIn('acute_injury', tags(hl='скорошна операция'))
+        self.assertEqual(tags(hl='нямам оплаквания', jp='не'), set())
+
+    def test_contraindicated_actions_get_safe_substitute(self):
+        # A balance-impaired user must never be served the one-leg balance action.
+        from .daily import today_actions
+        r = make_response(health_limitations='често получавам световъртеж')
+        slugs = {c['id'] for c in today_actions(r, n=6)}
+        self.assertNotIn('balance_practice', slugs)

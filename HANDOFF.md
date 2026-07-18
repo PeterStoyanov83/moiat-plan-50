@@ -105,13 +105,16 @@ Healthcheck fix (historical): `ALLOWED_HOSTS` always appends `.railway.app`; no 
 ---
 
 ## Latest (2026-07-18)
-- **Knowledge Engine — library grown 8 → 45 actions** (`migrations/0011_expand_action_library`)
-  across all 7 categories (movement/nutrition/hydration/sleep/social/mind/financial). All new
-  actions are `growth_mission` (adding cores would starve variety — daily.py shows cores first),
-  each with full metadata + `why` (Constitution). Only `severe_joint_pain`/`acute_injury`
-  contraindications used (the only tags `user_contraindications()` can infer). New
-  `KnowledgeLibraryTests` enforce the metadata contract (title/why/category/verification present,
-  alternatives resolve, contraindications inferrable). Still open: grow further; wire weather.
+- **Knowledge Engine — library grown 8 → 100 actions** (`migrations/0011`+`0012`) across all 7
+  categories (movement 19, mind 18, nutrition 17, social 14, sleep 12, financial 11, hydration 9).
+  All `growth_mission` (kept 4 cores so daily variety isn't starved), full metadata + `why`.
+- **Refined contraindication inference** (`daily.py::user_contraindications`): now 5 inferrable
+  tags — `severe_joint_pain`, `acute_injury`, plus **`cardiac`, `balance_issues`, `respiratory`**
+  (keyword scan of `health_limitations`). High-intensity actions (stairs, brisk walk, one-leg
+  balance…) carry the matching tags; `KnowledgeLibraryTests` enforce the metadata contract +
+  the inference + a safe-substitution test. 24/24 green.
+- **Weather deferred** to a later version (per founder — CI/CD scoping). Actions carry
+  `weather_adaptations` metadata (rain/heat/cold) but the planner doesn't honor it yet.
 - **PostHog analytics (EU) instrumented** via `@posthog/wizard` self-driving (project 227058,
   `eu.posthog.com`). Server-side events in `plans/views.py`: `questionnaire_completed`,
   `daily_action_completed`, `plan_downloaded`, `feedback_submitted` (+ a `.set`); client init in
