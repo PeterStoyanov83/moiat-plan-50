@@ -105,6 +105,13 @@ Healthcheck fix (historical): `ALLOWED_HOSTS` always appends `.railway.app`; no 
 ---
 
 ## Latest (2026-07-18)
+- **Knowledge Engine — library grown 8 → 45 actions** (`migrations/0011_expand_action_library`)
+  across all 7 categories (movement/nutrition/hydration/sleep/social/mind/financial). All new
+  actions are `growth_mission` (adding cores would starve variety — daily.py shows cores first),
+  each with full metadata + `why` (Constitution). Only `severe_joint_pain`/`acute_injury`
+  contraindications used (the only tags `user_contraindications()` can infer). New
+  `KnowledgeLibraryTests` enforce the metadata contract (title/why/category/verification present,
+  alternatives resolve, contraindications inferrable). Still open: grow further; wire weather.
 - **PostHog analytics (EU) instrumented** via `@posthog/wizard` self-driving (project 227058,
   `eu.posthog.com`). Server-side events in `plans/views.py`: `questionnaire_completed`,
   `daily_action_completed`, `plan_downloaded`, `feedback_submitted` (+ a `.set`); client init in

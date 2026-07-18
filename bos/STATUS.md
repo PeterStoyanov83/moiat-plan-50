@@ -8,7 +8,7 @@ Legend: ✅ done · 🟡 partial · ⬜ not started
 | Engine | Status | Code | Done | Open |
 |--------|--------|------|------|------|
 | 1 Behavior | 🟡 | `models.py` (Level, UserProgram, ActionDef), `daily.py`, `migrations/0008` | 20 levels + bands seeded; core/mission split; level-scaled targets; ≥3 actions/day | per-level mission themes; behavioral adaptation to weakest habits |
-| 2 Knowledge | 🟡 | `models.py::ActionDef`, `daily.py`, `migrations/0008-0010` | **full metadata** (incl. difficulty/duration/contraindications/weather/alternatives); **contraindication gating + safe-alternative substitution live**; 8 starter actions | grow library to hundreds; wire weather into planner |
+| 2 Knowledge | 🟡 | `models.py::ActionDef`, `daily.py`, `migrations/0008-0011` | **full metadata** (incl. difficulty/duration/contraindications/weather/alternatives); **contraindication gating + safe-alternative substitution live**; **45 actions across all 7 categories** (0011); metadata contract enforced by tests | grow library further (45 → hundreds); wire weather into planner |
 | 3 Verification | 🟡 | `verification.py`, `models.py::ActionLog` | 5 verifier types + anti-cheat; web = trust-based confirm | `/api/verify/sensor` + `/api/verify/photo`; wearable/HealthKit/Fit/GPS adapters |
 | 4 Level | 🟡 | `progression.py`, `Level` | mastery score (40/30/20/10); band checks; promote/extend on completion | nightly re-eval; UI messages; level-up → tree event |
 | 5 Recovery | 🟡 | `tree_state.py`, `UserProgram.recovery_until` | inactivity days; 7-day recovery window opens at ≥14 idle | apply recovery target multiplier in `daily.py`; welcome-back taper |
@@ -26,5 +26,5 @@ Legend: ✅ done · 🟡 partial · ⬜ not started
 `DailyAssignment` (migrations `0007` schema, `0008` seed).
 
 ## Verification of current build
-`python manage.py test plans` → 18/18 green. Local dev DB = sqlite. The ritual runs the
+`python manage.py test plans` → 22/22 green. Local dev DB = sqlite. The ritual runs the
 new ActionDef flow end-to-end (task+why → verified ActionLog → tree growth).

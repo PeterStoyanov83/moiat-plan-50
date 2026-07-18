@@ -200,3 +200,38 @@ class GoogleAccountTests(TestCase):
         c.get(reverse('ritual'))                                 # triggers claim
         resp.refresh_from_db()
         self.assertEqual(resp.user, user)
+
+
+class KnowledgeLibraryTests(TestCase):
+    """Knowledge Engine (bos/engines/02): the action library and its metadata contract."""
+    VALID_CATEGORIES = {'movement', 'nutrition', 'hydration', 'sleep', 'social', 'mind', 'financial'}
+    # Only tags daily.py::user_contraindications() can actually infer today.
+    INFERRABLE_CONTRA = {'severe_joint_pain', 'acute_injury'}
+
+    def setUp(self):
+        from .models import ActionDef
+        self.actions = list(ActionDef.objects.all())
+
+    def test_library_has_grown(self):
+        self.assertGreaterEqual(len(self.actions), 40)   # 8 starters + expansion
+
+    def test_every_action_has_full_metadata(self):
+        # Constitution: "no action without metadata" + "always explain WHY".
+        for a in self.actions:
+            self.assertTrue(a.title.strip(), f'{a.slug}: missing title')
+            self.assertTrue(a.why.strip(), f'{a.slug}: missing why')
+            self.assertIn(a.category, self.VALID_CATEGORIES, f'{a.slug}: bad category {a.category}')
+            self.assertTrue(a.verification_type, f'{a.slug}: missing verification')
+            self.assertGreaterEqual(a.difficulty, 1, f'{a.slug}: difficulty < 1')
+
+    def test_alternatives_reference_real_actions(self):
+        slugs = {a.slug for a in self.actions}
+        for a in self.actions:
+            for alt in (a.alternatives or []):
+                self.assertIn(alt, slugs, f'{a.slug}: alternative "{alt}" does not exist')
+
+    def test_contraindications_are_inferrable(self):
+        # Guard against dead safety metadata the engine can never act on.
+        for a in self.actions:
+            for c in (a.contraindications or []):
+                self.assertIn(c, self.INFERRABLE_CONTRA, f'{a.slug}: contraindication "{c}" not inferrable')
