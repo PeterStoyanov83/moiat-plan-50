@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Една крачка — 1Step</title>
+<title>Една стъпка — 1Step</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -59,6 +59,7 @@
 </head>
 <body>
   <div class="wrap" id="mainWrap">
+    {% include 'plans/_topnav.html' %}
     <div class="flex justify-center mb-4">
       <div class="sun">
         <svg class="w-12 h-12 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -68,7 +69,7 @@
       </div>
     </div>
     <p class="fadein d1 text-center text-xl text-[color:var(--muted)] mb-1">Добро утро{% if greeting_name %}, {{ greeting_name }}{% endif %}.</p>
-    <p id="lead" class="fadein d2 text-center text-2xl font-extrabold mb-5">{{ companion_message|default:"Избери своята крачка за днес:" }}</p>
+    <p id="lead" class="fadein d2 text-center text-2xl font-extrabold mb-5">{{ companion_message|default:"Избери своята стъпка за днес:" }}</p>
 
     <div id="choices" class="space-y-3"></div>
 
@@ -97,16 +98,11 @@
       </svg>
     </div>
     <h1 class="pop text-4xl font-extrabold mb-3">Браво!</h1>
-    <p id="finalMsg" class="pop text-xl text-[color:var(--muted)] leading-relaxed">Днес направи своята<br>една крачка.</p>
+    <p id="finalMsg" class="pop text-xl text-[color:var(--muted)] leading-relaxed">Днес направи своята<br>една стъпка.</p>
     <p class="pop text-lg text-[color:var(--green)] font-bold mt-6">Утре ще продължим</p>
   </div>
 
-  <nav class="tab">
-    <a href="{% url 'ritual' %}" class="active"><svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.3"/><path d="M12 2.5v2M12 19.5v2M4 4l1.5 1.5M18.5 18.5l1.5 1.5M2.5 12h2M19.5 12h2M4 20l1.5-1.5M18.5 5.5l1.5-1.5"/></svg>Днес</a>
-    <a href="{% url 'progress' %}"><svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-7"/><path d="M12 14c-2.6 0-4.6-1.9-4.6-4.6C10.1 9.4 12 11.3 12 14z"/><path d="M12 14c2.6 0 4.6-1.9 4.6-4.6C13.9 9.4 12 11.3 12 14z"/></svg>Напредък</a>
-    {% if plan_id %}<a href="{% url 'result' plan_id %}"><svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v16l-7-3-7 3z"/><path d="M9 8h6M9 11h6"/></svg>Пълен план</a>{% endif %}
-    <a href="{% url 'profile' %}"><svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.6 3-6 7-6s7 2.4 7 6"/></svg>Профил</a>
-  </nav>
+  {% include 'plans/_bottomnav.html' %}
 
 <script>
   const CSRF='{{ csrf_token }}', DONE_URL="{% url 'step_done' %}";
@@ -125,7 +121,7 @@
   const META={water:['#E7F1F6','#2F6E8F'],walk:['#E8F5E9','#2E7D32'],stretch:['#EDE7F6','#6A5AA0'],salad:['#E9F4EA','#3E8E41'],friend:['#FCEFDD','#C57A1E'],sleep:['#E7ECF6','#41689E'],coin:['#F7EFD6','#A5811F']};
 
   const box=document.getElementById('choices'), lead=document.getElementById('lead'), counter=document.getElementById('counter');
-  function updateProgress(p){PROGRESS=p;let t=`Днес: ${p.done_today} ${p.done_today===1?'крачка':'крачки'} · всяка е победа.`;if(p.streak>1)t=`Днес: ${p.done_today} · ${p.streak} поредни дни 🌱`;counter.textContent=t;}
+  function updateProgress(p){PROGRESS=p;let t=`Днес: ${p.done_today} ${p.done_today===1?'стъпка':'стъпки'} · всяка е победа.`;if(p.streak>1)t=`Днес: ${p.done_today} · ${p.streak} поредни дни 🌱`;counter.textContent=t;}
   function render(choices){
     box.innerHTML='';
     choices.forEach((s,i)=>{
@@ -134,7 +130,7 @@
       el.className='opt in';el.style.animationDelay=(i*.08)+'s';
       el.innerHTML=`<span class="letter">${LETTERS[i]||''}</span>
         <span class="ico" style="background:${m[0]};color:${m[1]}">${ICON[s.icon]||ICON.walk}</span>
-        <span class="flex-1 text-lg font-bold leading-snug">${s.text}</span>`;
+        <span class="flex-1 text-left"><span class="block text-lg font-bold leading-snug">${s.text}</span>${s.why?`<span class="block text-sm font-semibold mt-1" style="opacity:.62">${s.why}</span>`:''}</span>`;
       el.onclick=()=>choose(s);
       box.appendChild(el);
     });
@@ -142,18 +138,18 @@
   async function post(url,body){const r=await fetch(url,{method:'POST',headers:{'X-CSRFToken':CSRF,'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(body)});return r.json();}
   function finish(msg){document.getElementById('mainWrap').style.display='none';const f=document.getElementById('final');f.classList.add('show');if(msg)document.getElementById('finalMsg').innerHTML=msg;burst();}
   async function choose(s){
-    const data=await post(DONE_URL,{text:s.text,category:s.category});
+    const data=await post(DONE_URL,{action:s.id||'',text:s.text,category:s.category});
     const flash=document.getElementById('flash');flash.classList.add('show');
     setTimeout(()=>{
       flash.classList.remove('show');updateProgress(data.progress);
-      if(data.choices&&data.choices.length){lead.textContent='Готово! Ето следващите крачки:';render(data.choices);}
-      else finish('Направи всичките си крачки за днес!<br>Гордеем се с теб.');
+      if(data.choices&&data.choices.length){lead.textContent='Готово! Ето следващите стъпки:';render(data.choices);}
+      else finish('Направи всичките си стъпки за днес!<br>Гордеем се с теб.');
     },1250);
   }
   function burst(){const cols=['#4CAF50','#FFB74D','#4A90A4','#A5D6A7','#FFE0B2'];for(let i=0;i<70;i++){const p=document.createElement('div');p.className='confetti';p.style.left=Math.random()*100+'vw';p.style.background=cols[i%cols.length];p.style.animationDuration=(2.4+Math.random()*1.8)+'s';p.style.animationDelay=(Math.random()*.6)+'s';document.body.appendChild(p);setTimeout(()=>p.remove(),4800);}}
-  document.getElementById('stopBtn').addEventListener('click',()=>finish(PROGRESS.done_today?null:'Дори че си тук — това е крачка.<br>До утре!'));
+  document.getElementById('stopBtn').addEventListener('click',()=>finish(PROGRESS.done_today?null:'Дори че си тук — това е стъпка.<br>До утре!'));
   updateProgress(PROGRESS);
-  if(INITIAL&&INITIAL.length)render(INITIAL); else finish(PROGRESS.done_today?'Направи всичките си крачки за днес!<br>Гордеем се с теб.':null);
+  if(INITIAL&&INITIAL.length)render(INITIAL); else finish(PROGRESS.done_today?'Направи всичките си стъпки за днес!<br>Гордеем се с теб.':null);
 </script>
 </body>
 </html>

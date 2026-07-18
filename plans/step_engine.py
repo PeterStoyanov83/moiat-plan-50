@@ -1,4 +1,4 @@
-"""Daily single-step engine for the "Една крачка" ritual.
+"""Daily single-step engine for the "Една стъпка" ritual.
 
 The knowledge base already holds every step we need (movement/nutrition by
 level, plus social and finance pools). This module serves those tasks **one at

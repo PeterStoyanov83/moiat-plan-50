@@ -93,6 +93,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'plans.context_processors.google_flags',
+                'plans.context_processors.nav_context',
             ],
         },
     },

@@ -9,15 +9,15 @@
     <div class="container text-center">
         <div style="font-size: 3.5rem; margin-bottom: 1rem;">☀️</div>
         <h1 style="font-size: 2.6rem; font-weight: 800; margin-bottom: 1.2rem; color: #1B5E20;">
-            Една крачка към по-добър живот.<br>Всеки ден.
+            Една стъпка към по-добър живот.<br>Всеки ден.
         </h1>
         <p class="lead" style="font-size: 1.25rem; color: #37474F; max-width: 680px; margin: 0 auto 2.5rem;">
             Отговорете на няколко въпроса и всяка сутрин ще виждате своята
             една малка стъпка — движение, хранене, сън или разговор с близък.
-            Без претоварване. Достатъчна е една крачка.
+            Без претоварване. Достатъчна е една стъпка.
         </p>
         <a href="{% url 'questionnaire' %}" class="btn-primary-custom" style="font-size: 1.3rem; padding: 1rem 3rem;">
-            Направи първата крачка
+            Направи първата стъпка
         </a>
         <p style="margin-top: 1.2rem; color: var(--muted); font-size: 0.95rem;">
             Отнема около 3 минути • Напълно безплатно
@@ -26,7 +26,7 @@
         {% if user.is_authenticated %}
         <p style="margin-top: 1.5rem; color: var(--muted);">
             Влезли сте като <strong>{{ user.first_name|default:user.email }}</strong> ·
-            <a href="{% url 'ritual' %}" style="color: var(--primary); font-weight:700;">Към днешната крачка →</a>
+            <a href="{% url 'ritual' %}" style="color: var(--primary); font-weight:700;">Към днешната стъпка →</a>
             <form method="post" action="{% url 'account_logout' %}" style="display:inline;">{% csrf_token %}
                 <button type="submit" style="background:none;border:none;color:var(--muted);text-decoration:underline;cursor:pointer;font-size:0.95rem;padding:0;">Изход</button>
             </form>
@@ -64,7 +64,7 @@
             <div class="col-md-6 col-lg-3">
                 <div class="card-custom text-center" style="height: 100%;">
                     <div class="step-number mx-auto mb-3">3</div>
-                    <h4>Всеки ден — по една крачка</h4>
+                    <h4>Всеки ден — по една стъпка</h4>
                     <p class="text-muted">Виждате една малка стъпка. Щом сте готови, идва следващата.</p>
                 </div>
             </div>
@@ -72,7 +72,7 @@
                 <div class="card-custom text-center" style="height: 100%;">
                     <div class="step-number mx-auto mb-3">4</div>
                     <h4>Проследявате напредъка</h4>
-                    <p class="text-muted">Малките крачки се събират в истинска промяна.</p>
+                    <p class="text-muted">Малките стъпки се събират в истинска промяна.</p>
                 </div>
             </div>
         </div>
@@ -92,7 +92,7 @@
                 <h2 style="font-size: 2rem; margin-bottom: 1.5rem;">За кого е подходящо?</h2>
                 <ul style="list-style: none; padding: 0; font-size: 1.1rem;">
                     <li style="padding: 0.6rem 0; border-bottom: 1px solid #eee;">
-                        ✅ За хора над 50, които искат да се чувстват по-добре
+                        ✅ За всеки, който иска да се чувства по-добре
                     </li>
                     <li style="padding: 0.6rem 0; border-bottom: 1px solid #eee;">
                         ✅ За тези, които нямат идея откъде да започнат

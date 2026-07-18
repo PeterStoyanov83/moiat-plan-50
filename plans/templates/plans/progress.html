@@ -22,8 +22,9 @@
 </head>
 <body>
   <div class="wrap">
+    {% include 'plans/_topnav.html' %}
     <h1 class="text-3xl font-extrabold mb-1 fadein">Твоето дърво</h1>
-    <p class="text-[color:var(--muted)] mb-4 fadein">Расте с всяка твоя крачка, {{ greeting_name|default:"приятелю" }}.</p>
+    <p class="text-[color:var(--muted)] mb-4 fadein">Расте с всяка твоя стъпка, {{ greeting_name|default:"приятелю" }}.</p>
 
     <!-- LIVING TREE (centerpiece) -->
     <div class="card fadein" style="overflow:hidden;padding:.5rem;">
@@ -39,13 +40,13 @@
       </div>
       <div class="card p-5 text-center fadein">
         <div class="text-5xl font-extrabold text-[color:var(--green)]">{{ total }}</div>
-        <div class="text-sm font-semibold text-[color:var(--muted)] mt-1">крачки общо</div>
+        <div class="text-sm font-semibold text-[color:var(--muted)] mt-1">стъпки общо</div>
       </div>
     </div>
 
     <!-- recent steps -->
     <div class="card p-5 fadein">
-      <p class="font-extrabold mb-3">Последни крачки</p>
+      <p class="font-extrabold mb-3">Последни стъпки</p>
       {% for s in recent %}
       <div class="flex items-center gap-3 py-2 {% if not forloop.last %}border-b border-[#F2EADB]{% endif %}">
         <span class="w-7 h-7 rounded-full bg-[#E8F5E9] text-[color:var(--green)] flex items-center justify-center text-sm font-black shrink-0">✓</span>
@@ -53,31 +54,61 @@
         <span class="text-xs text-[color:var(--muted)] whitespace-nowrap">{{ s.completed_on|date:"d.m" }}</span>
       </div>
       {% empty %}
-      <p class="text-[color:var(--muted)]">Направи първата си крачка днес и дървото ще пусне корен. 🌱</p>
+      <p class="text-[color:var(--muted)]">Направи първата си стъпка днес и дървото ще пусне корен. 🌱</p>
       {% endfor %}
     </div>
   </div>
 
-  <nav class="tab">
-    <a href="{% url 'ritual' %}"><svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.3"/><path d="M12 2.5v2M12 19.5v2M4 4l1.5 1.5M18.5 18.5l1.5 1.5M2.5 12h2M19.5 12h2M4 20l1.5-1.5M18.5 5.5l1.5-1.5"/></svg>Днес</a>
-    <a href="{% url 'progress' %}" class="active"><svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-9"/><path d="M12 12c-3 0-5-2-5-5 3 0 5 2 5 5z"/><path d="M12 12c3 0 5-2 5-5-3 0-5 2-5 5z"/><path d="M12 12c0-2 1.4-3.5 3.5-3.5"/></svg>Дърво</a>
-    {% if plan_id %}<a href="{% url 'result' plan_id %}"><svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v16l-7-3-7 3z"/><path d="M9 8h6M9 11h6"/></svg>Пълен план</a>{% endif %}
-    <a href="{% url 'profile' %}"><svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.6 3-6 7-6s7 2.4 7 6"/></svg>Профил</a>
-  </nav>
+  {% include 'plans/_bottomnav.html' %}
 
 <script type="module">
   import { mountTree, growthStage } from "{% static 'plans/tree-engine.js' %}";
   const canvas = document.getElementById('treeCanvas');
+  const st = document.getElementById('treeStage');
   const total = {{ total }};
+  const seed = "{{ tree_seed|escapejs }}";
+  const stageLabel = (n) => { try { return (growthStage(n) || {}).label || ''; } catch (e) { return ''; } };
+
+  // Remember how many steps the tree had the last time THIS user looked at it,
+  // so a step completed since then zooms in on its new leaf — the engine's
+  // cinematic reveal auto-plays once the canvas is really on screen (this page).
+  const key = 'tree_seen_' + seed;
+  let lastSeen = parseInt(localStorage.getItem(key), 10);
+  if (!Number.isFinite(lastSeen) || lastSeen > total) lastSeen = total; // first visit → full tree, no reveal
+
   try {
-    mountTree(canvas, {
-      userId: "{{ tree_seed|escapejs }}",
-      completedActions: total,
+    const { tree } = mountTree(canvas, {
+      userId: seed,
+      completedActions: lastSeen,
       season: "{{ tree_season }}",
       personality: "calm",
+      level: {{ tree_level|default:1 }},   // system-driven (never user-picked)
     });
-    const st = document.getElementById('treeStage');
-    if (st && growthStage) st.textContent = growthStage(total).label || '';
+    // Gentle inactivity state — wood & roots never regress.
+    tree.setHealth({{ tree_health|default:100 }});
+    tree.setDormant({{ tree_dormant|default:"false" }});
+    // Start on the BEFORE state so the growth is something the user watches happen.
+    if (st) st.textContent = stageLabel(lastSeen);
+    // Keep the caption live as each banked leaf lands during the reveal.
+    tree.onRevealStop = (n) => { if (st) st.textContent = stageLabel(n); };
+    // Mark the growth "seen" ONLY once the reveal actually lands on screen — so
+    // if the user hasn't looked yet (page still settling / tree scrolled away),
+    // it replays next time instead of being silently skipped.
+    tree.onReveal = () => {
+      if (st) st.textContent = stageLabel(total);
+      localStorage.setItem(key, String(total));
+    };
+
+    if (total > lastSeen) {
+      // Queue the new leaves only after the page has fully settled — never before
+      // the user can see them. The engine still waits until the canvas is on
+      // screen (its own visibility gate) before the zoom-in plays.
+      const queue = () => setTimeout(() => tree.queueActions(total), 700);
+      if (document.readyState === 'complete') queue();
+      else window.addEventListener('load', queue, { once: true });
+    } else {
+      localStorage.setItem(key, String(total)); // nothing new to reveal; keep in sync
+    }
   } catch (e) { console.warn('tree failed', e); }
 </script>
 </body>

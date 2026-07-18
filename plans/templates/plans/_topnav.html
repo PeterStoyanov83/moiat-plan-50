@@ -1,0 +1,13 @@
+{% comment %}Shared upper nav bar — brand + profile/login. Works in both the
+Bootstrap (base.html) pages and the standalone Tailwind pages; parent controls width.{% endcomment %}
+<nav class="site-topnav" style="display:flex;justify-content:space-between;align-items:center;padding:1.1rem 0;">
+    <a href="{% url 'home' %}" style="display:inline-flex;align-items:center;gap:.5rem;font-size:1.5rem;font-weight:800;color:#2E7D32;text-decoration:none;">
+        <span style="width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 50% 50%,#FFD180 0%,#FFB74D 60%,rgba(255,183,77,0) 74%);flex:none;"></span>
+        1Step
+    </a>
+    {% if user.is_authenticated %}
+    <a href="{% url 'profile' %}" style="color:#2E7D32;font-weight:700;text-decoration:none;">👤 Профил</a>
+    {% else %}
+    <a href="{% url 'account_login' %}" style="color:#2E7D32;font-weight:700;text-decoration:none;">Вход</a>
+    {% endif %}
+</nav>

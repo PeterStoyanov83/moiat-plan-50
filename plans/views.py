@@ -77,10 +77,11 @@ def ritual(request):
     response = _session_response(request)
     if response is None:
         return redirect('questionnaire')
-    # AI companion recommends option A + a warm line (when enabled); the other
-    # two options come from the rule-based engine. Falls back cleanly.
-    step, companion_message = pick_opening_step(response)
-    choices = _build_choices(response, step)
+    # AI companion writes a warm opening line (when enabled). Actions now come
+    # from the ActionDef library (core habits + missions), scaled to the level.
+    _, companion_message = pick_opening_step(response)
+    from .daily import today_actions
+    choices = today_actions(response)
     plan = getattr(response, 'plan', None)
     context = {
         'greeting_name': response.first_name or '',
@@ -106,11 +107,34 @@ def step_done(request):
     response = _session_response(request)
     if response is None:
         return JsonResponse({'error': 'no-session'}, status=400)
+    slug = request.POST.get('action', '').strip()
     text = request.POST.get('text', '').strip()
     category = request.POST.get('category', '').strip()
+
+    if slug:
+        # New ActionDef flow. The web shell has no sensors, so a tap is a
+        # trust-based completion (CONFIRMED); real sensor/timer/photo verification
+        # happens on mobile via the /api/verify endpoints (verification.py).
+        from .models import ActionDef, ActionLog, UserProgram
+        from .progression import evaluate_level
+        action = ActionDef.objects.filter(slug=slug).first()
+        if action:
+            today = timezone.localdate()
+            ActionLog.objects.create(
+                response=response, action=action, date=today,
+                status=ActionLog.CONFIRMED, verification_type=action.verification_type,
+            )
+            # Bridge to StepCompletion so streak / tree / progress stay consistent.
+            mark_done(response, text or action.title, category or action.category)
+            # System-driven level check (no-op until the level's window elapses).
+            program, _ = UserProgram.objects.get_or_create(response=response)
+            evaluate_level(program, today)
+        from .daily import today_actions
+        return JsonResponse({'choices': today_actions(response), 'progress': today_progress(response)})
+
+    # Legacy fallback (old knowledge-base flow / existing tests).
     if text:
         mark_done(response, text, category)
-    # Offer the next set of options (rule-based — keeps each tap instant).
     return JsonResponse({'choices': _build_choices(response), 'progress': today_progress(response)})
 
 
@@ -137,6 +161,9 @@ def progress(request):
     month = timezone.localdate().month
     season = ('spring' if month in (3, 4, 5) else 'summer' if month in (6, 7, 8)
               else 'autumn' if month in (9, 10, 11) else 'spring')
+    # Living tree: system-driven level (never user-picked) + gentle inactivity health.
+    from .tree_state import compute_tree_state
+    tree = compute_tree_state(response)
     context = {
         'greeting_name': response.first_name or '',
         'streak': prog['streak'],
@@ -147,6 +174,9 @@ def progress(request):
         'response_id': response.pk,
         'tree_seed': seed,
         'tree_season': season,
+        'tree_level': tree['level'],
+        'tree_health': tree['health'],
+        'tree_dormant': 'true' if tree['dormant'] else 'false',
     }
     return render(request, 'plans/progress.html', context)
 

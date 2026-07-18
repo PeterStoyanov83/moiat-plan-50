@@ -8,7 +8,10 @@
   <style>
     :root{--green:#2E7D32;--green-d:#1B5E20;--cream:#FBF7EE;--card:#FEFCF7;--ink:#22302A;--muted:#5F6F66;}
     *{box-sizing:border-box}
-    body{font-family:'Nunito',sans-serif;background:var(--cream);color:var(--ink);margin:0;font-size:1.08rem;line-height:1.7}
+    body{font-family:'Nunito',sans-serif;background:var(--cream);color:var(--ink);margin:0;font-size:1.08rem;line-height:1.7;padding-bottom:5.5rem}
+    nav.tab{position:fixed;bottom:0;inset-inline:0;max-width:28rem;margin:0 auto;background:rgba(254,252,247,.94);backdrop-filter:blur(6px);border-top:1px solid #EFE7D7;padding:.6rem 1.5rem;display:flex;justify-content:space-between;font-size:.72rem;font-weight:700;color:var(--muted);z-index:1030}
+    nav.tab a{display:flex;flex-direction:column;align-items:center;gap:.15rem;text-decoration:none;color:inherit;font-weight:700}
+    nav.tab a.active{color:var(--green)}
     header{padding:1.1rem 1.5rem}
     header a.brand{font-weight:800;font-size:1.4rem;color:var(--green);text-decoration:none;display:inline-flex;align-items:center;gap:.5rem}
     .brand-sun{width:26px;height:26px;border-radius:50%;background:radial-gradient(circle,#FFD180 0%,#FFB74D 60%,rgba(255,183,77,0) 74%)}
@@ -36,5 +39,6 @@
     <p style="text-align:center;margin-top:1.5rem;"><a href="/">← Към началото</a></p>
   </main>
   {% block extra_body %}{% endblock %}
+  {% include 'plans/_bottomnav.html' %}
 </body>
 </html>

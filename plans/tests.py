@@ -137,7 +137,7 @@ class RitualFlowTests(TestCase):
         r = c.get(reverse('progress'))
         self.assertEqual(r.status_code, 200)
         self.assertContains(r, 'Твоето дърво')        # living-tree progress screen
-        self.assertContains(r, step['text'])          # shows in "Последни крачки"
+        self.assertContains(r, step['text'])          # shows in "Последни стъпки"
 
     def test_progress_without_session_redirects(self):
         self.assertRedirects(Client().get(reverse('progress')), reverse('questionnaire'))
@@ -155,12 +155,12 @@ class AICompanionTests(TestCase):
     def test_uses_ai_choice_when_enabled(self):
         r = make_response()
         with mock.patch.object(ai_companion, 'enabled', return_value=True), \
-             mock.patch.object(ai_companion, '_ai_choose', return_value=(0, 'Днес една малка крачка.')):
+             mock.patch.object(ai_companion, '_ai_choose', return_value=(0, 'Днес една малка стъпка.')):
             step, message = ai_companion.pick_opening_step(r)
         # index 0 of the candidate list, with the AI's warm line
         candidates = [s for s in se.eligible_steps(r)]
         self.assertEqual(step['text'], candidates[0]['text'])
-        self.assertEqual(message, 'Днес една малка крачка.')
+        self.assertEqual(message, 'Днес една малка стъпка.')
 
 
 class GoogleAccountTests(TestCase):

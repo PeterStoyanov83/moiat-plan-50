@@ -1,4 +1,4 @@
-# BHANDOFF – 1Step („Една крачка") · Business
+# BHANDOFF – 1Step („Една стъпка") · Business
 
 Business / non-technical handoff. Product strategy, market, monetization, validation,
 GTM. (For code, deploy, env vars → `HANDOFF.md`.) Items marked **[ФОУНДЪР]** need your
@@ -7,7 +7,7 @@ input — don't treat placeholders as decided.
 ---
 
 ## One-liner
-**„Една крачка. Всеки ден."** — a calm daily health companion for Bulgarians **50+**
+**„Една стъпка. Всеки ден."** — a calm daily health companion for Bulgarians **50+**
 that shows **one** small step at a time instead of overwhelming plans, dashboards, or
 medical jargon.
 
@@ -51,7 +51,7 @@ Funnel + retention + willingness-to-pay. Data is in Django admin (`/admin/`):
 - Communities of 50+: pensioner clubs, читалища, church/community groups, Facebook groups.
 - Adult children buying/sharing it for parents (gift/for-my-mum angle).
 - Partnerships: pharmacies, GPs, physiotherapists, health-food shops.
-- Content: short Bulgarian tips ("днешната ти крачка"), reels, local press.
+- Content: short Bulgarian tips ("днешната ти стъпка"), reels, local press.
 - **[ФОУНДЪР]** first channel to run a real test on + budget?
 
 ## Competitive landscape
@@ -59,9 +59,9 @@ Funnel + retention + willingness-to-pay. Data is in Django admin (`/admin/`):
   nothing, a notebook, family nagging) and why 1Step wins for this audience.
 
 ## Positioning / messaging (current live copy)
-- Hero: „Една крачка към по-добър живот. Всеки ден." · CTA „Направи първата крачка".
-- Reassurance: „Не е нужно да направиш всичко. Достатъчна е една крачка."
-- **[ФОУНДЪР]** brand name final? („1Step" vs „Една крачка" — currently both in use).
+- Hero: „Една стъпка към по-добър живот. Всеки ден." · CTA „Направи първата стъпка".
+- Reassurance: „Не е нужно да направиш всичко. Достатъчна е една стъпка."
+- Brand name **resolved: 1Step** (Bulgarian motto „Една стъпка. Всеки ден.").
 
 ## Legal / trust (business view; tech in HANDOFF)
 - Health data (age, weight, health notes) = **GDPR special category** → consent checkbox
@@ -89,6 +89,16 @@ Funnel + retention + willingness-to-pay. Data is in Django admin (`/admin/`):
 - **[ФОУНДЪР]** collaborators, advisors, pilot partners.
 
 ---
+
+## Latest (2026-07-18) — branding & navigation
+- **Brand terminology settled: „стъпка" (step).** Full rebrand from „крачка" → „стъпка"
+  across all copy; motto is now **„Една стъпка. Всеки ден."** Product name **resolved: 1Step**
+  (the earlier „1Step" vs „Една крачка" open question is closed).
+- **Navigation now consistent on every page** — a top bar (brand + Профил/Вход) and a bottom
+  tab bar (Днес · Напредък · Пълен план · Профил) app-wide. Lowers friction for the 50+
+  audience: the same simple wayfinding everywhere, no dead-ends.
+- **Still open [ФОУНДЪР]:** reflection storage, price point + first paid test, first GTM channel
+  (unchanged from below).
 
 ## Latest (2026-07-16) — product/UX direction
 - **Philosophy locked as "personal life companion"** (not tracker): calm, warm, one small

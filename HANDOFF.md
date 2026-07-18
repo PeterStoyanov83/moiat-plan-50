@@ -1,15 +1,15 @@
-# HANDOFF – 1Step („Една крачка")
+# HANDOFF – 1Step („Една стъпка")
 
 ## Project
-Django app for people 50+. **Pivoted** from a static 7-day health plan into a calm
-**daily one-step ritual**: „Една крачка. Всеки ден." — the app shows **one** small
+Django app for anyone who wants calmer, healthier daily habits. **Pivoted** from a static 7-day health plan into a calm
+**daily one-step ritual**: „Една стъпка. Всеки ден." — the app shows **one** small
 step at a time; the user does it or swaps for another, and the next is offered.
 
 - **GitHub:** https://github.com/PeterStoyanov83/moiat-plan-50
 - **Live URL:** https://web-production-e3b54.up.railway.app
 - **Railway project:** `1-step App` (service `web`) · Postgres attached
-- **Local path:** `/Users/peterstoyanov/PycharmProjects/PythonProject/moiat_plan_50`
-- **Python package:** `onestep` (gunicorn: `onestep.wsgi:application`). Outer repo dir is still `moiat_plan_50/`.
+- **Local path:** `/Users/peterstoyanov/PycharmProjects/PythonProject/1Step` (local app folder renamed from `moiat_plan_50/` → `1Step/` on 2026-07-18; nested git repo, GitHub name `moiat-plan-50` and Railway unaffected). Outer PyCharm workspace dir `PythonProject/` rename pending (user does it — it's the live CWD).
+- **Python package:** `onestep` (gunicorn: `onestep.wsgi:application`).
 
 ---
 
@@ -18,7 +18,7 @@ step at a time; the user does it or swaps for another, and the next is offered.
 The full ritual redesign + accounts are deployed and verified in production.
 
 ### User flow
-1. `/` home → „Направи първата крачка" (or „Влез с Google" / „Вход")
+1. `/` home → „Направи първата стъпка" (or „Влез с Google" / „Вход")
 2. `/questionnaire/` — 18-q interview (+ `first_name`, GDPR consent). Prefilled name if signed in.
 3. → **session** `response_id` + (if logged in) tie to user → redirect to `/ritual/`
 4. `/ritual/` — the daily one-step ritual (single step, „Направих го" / „Покажи ми друга",
@@ -40,9 +40,10 @@ plans/
 ├── ai_companion.py     # optional: Claude (Haiku 4.5) picks step + writes line; falls back to engine
 ├── profile_logic.py    # determine_profile() + generate_plan() (for the full plan / PDF)
 ├── views.py            # home, questionnaire, ritual, step_done, step_swap, progress, profile, result, pdf, feedback, privacy
-├── context_processors.py  # google_flags
+├── context_processors.py  # google_flags + nav_context (supplies nav_plan_id to every page)
 ├── forms.py, admin.py, urls.py
 └── templates/plans/    # base.html (calm cream), home, questionnaire, ritual, progress, profile, result, pdf_plan, privacy, feedback*
+                        # + _topnav.html / _bottomnav.html — shared nav partials (top + bottom) used app-wide
 templates/allauth/layouts/base.html   # brands all allauth pages (project DIRS override)
 onestep/settings.py     # allauth + google + email/password + email backend + hardening
 ```
@@ -91,10 +92,25 @@ Healthcheck fix (historical): `ALLOWED_HOSTS` always appends `.railway.app`; no 
 - [ ] **Fill privacy contact** placeholder in `templates/plans/privacy.html` (`[ДОПЪЛНЕТЕ…]`) before wide launch.
 - [ ] **SMTP** (`EMAIL_HOST` …) so password-reset emails actually send.
 - [ ] **Change the temp admin password** for `Peter`.
-- [ ] Optional: add Profile/Login to the ritual/progress bottom nav (currently header + home only).
 - [ ] Optional: multi-week level progression; reminders/notifications.
+- [ ] Rename the outer PyCharm workspace folder `PythonProject/` → `1Step/` (user; it's the live CWD + drives Claude's memory path). Optional: rename GitHub repo `moiat-plan-50` → 1Step.
 
 ---
+
+## Latest (2026-07-18)
+- **Terminology rebrand крачка/крачки → стъпка/стъпки** across all code + docs (templates,
+  `step_engine.py`, `ai_companion.py`, `tests.py`, `knowledge_base.json`, and the `.md` docs).
+  Motto is now **„Една стъпка. Всеки ден."** (founder chose the full rebrand). Brand name
+  resolved: **1Step**. No behaviour change; 18 tests still green.
+- **Upper + bottom nav on ALL pages.** New shared partials `plans/templates/plans/_topnav.html`
+  (brand + Профил/Вход) and `_bottomnav.html` (Днес · Напредък · Пълен план · Профил, active tab
+  auto-detected from `request.resolver_match.url_name`). Wired into `base.html` (all Bootstrap
+  pages, + bottom-nav CSS & body padding), `ritual.html` and `progress.html` (added top nav,
+  swapped their inline bottom navs for the include), and the allauth base (bottom nav added).
+  New `context_processors.nav_context` supplies `nav_plan_id` everywhere so „Пълен план" shows
+  app-wide (registered in `settings.TEMPLATES`). PDF template left nav-free.
+- **Local app folder renamed** `moiat_plan_50/` → `1Step/` (see Project). Nested repo/GitHub/Railway unaffected.
+- **Session-start protocol added to `CLAUDE.md`**: read HANDOFF.md + BHANDOFF.md + bos/CONSTITUTION.md + bos/STATUS.md first, every session.
 
 ## Latest (2026-07-16)
 - **Ritual = one step as 3 options (А/Б/В).** `step_engine.offer_choices()` returns

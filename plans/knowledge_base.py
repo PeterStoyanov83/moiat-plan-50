@@ -44,7 +44,7 @@ def _preferred_list(response):
 
 
 def movement_level_for(response):
-    """Map the questionnaire to a movement level (1–3), erring gentle for 50+."""
+    """Map the questionnaire to a movement level (1–3), erring gentle by default."""
     level = {'ниско': 1, 'леко': 2, 'умерено': 3, 'активно': 3}.get(response.movement_level, 1)
     if response.joint_pain == 'силно':
         level = 1
