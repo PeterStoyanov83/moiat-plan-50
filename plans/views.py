@@ -11,6 +11,7 @@ from .models import QuestionnaireResponse, UserPlan, Feedback, StepCompletion
 from .profile_logic import determine_profile, generate_plan
 from .step_engine import offer_step, offer_choices, mark_done, today_progress, weekly_history
 from .ai_companion import pick_opening_step
+from . import apps
 
 
 def home(request):
@@ -62,6 +63,17 @@ def questionnaire(request):
             # Remember this person for their daily ritual (no login in MVP),
             # then send them into the one-step ritual — not the old dashboard.
             request.session['response_id'] = response.pk
+            distinct_id = str(request.user.pk) if request.user.is_authenticated else f'response-{response.pk}'
+            if request.user.is_authenticated:
+                apps.posthog_client.set(
+                    distinct_id=distinct_id,
+                    properties={'has_personalized_plan': True},
+                )
+            apps.posthog_client.capture(
+                distinct_id=distinct_id,
+                event='questionnaire_completed',
+                properties={'profile_type': profile_type, 'authenticated': request.user.is_authenticated},
+            )
             return redirect('ritual')
     else:
         # Prefill the name from the Google profile when signed in.
@@ -129,6 +141,17 @@ def step_done(request):
             # System-driven level check (no-op until the level's window elapses).
             program, _ = UserProgram.objects.get_or_create(response=response)
             evaluate_level(program, today)
+            distinct_id = str(request.user.pk) if request.user.is_authenticated else f'response-{response.pk}'
+            apps.posthog_client.capture(
+                distinct_id=distinct_id,
+                event='daily_action_completed',
+                properties={
+                    'action_slug': action.slug,
+                    'category': action.category,
+                    'verification_type': action.verification_type,
+                    'current_level': program.current_level,
+                },
+            )
         from .daily import today_actions
         return JsonResponse({'choices': today_actions(response), 'progress': today_progress(response)})
 
@@ -212,6 +235,14 @@ def download_pdf(request, plan_id):
         pdf_file = HTML(string=html_string).write_pdf()
         response = HttpResponse(pdf_file, content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="1step_{plan_id}.pdf"'
+        distinct_id = (
+            str(request.user.pk) if request.user.is_authenticated else f'response-{plan.response_id}'
+        )
+        apps.posthog_client.capture(
+            distinct_id=distinct_id,
+            event='plan_downloaded',
+            properties={'profile_type': plan.profile_type, 'authenticated': request.user.is_authenticated},
+        )
         return response
     except ImportError:
         return HttpResponse(
@@ -228,6 +259,21 @@ def feedback(request, response_id):
             fb = form.save(commit=False)
             fb.response = questionnaire_response
             fb.save()
+            distinct_id = (
+                str(request.user.pk) if request.user.is_authenticated else f'response-{questionnaire_response.pk}'
+            )
+            apps.posthog_client.capture(
+                distinct_id=distinct_id,
+                event='feedback_submitted',
+                properties={
+                    'clarity_score': fb.clarity_score,
+                    'usefulness_score': fb.usefulness_score,
+                    'realistic_score': fb.realistic_score,
+                    'would_use_again': fb.would_use_again,
+                    'would_pay': fb.would_pay,
+                    'suggested_price': fb.suggested_price or 'not_provided',
+                },
+            )
             return redirect('feedback_success')
     else:
         form = FeedbackForm()

@@ -8,3 +8,7 @@ staticfiles/
 *.egg-info/
 dist/
 .DS_Store
+
+# PostHog wizard scratch (keep out of the app repo)
+.claude/
+posthog-*-report.md

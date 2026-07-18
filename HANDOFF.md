@@ -94,11 +94,28 @@ Healthcheck fix (historical): `ALLOWED_HOSTS` always appends `.railway.app`; no 
 - [x] **SMTP** — Resend SMTP wired on Railway `1-step App`/web (from `1Step <info@najivo.bg>`); verified 2026-07-18. Optional: confirm a live reset via `/accounts/password/reset/`.
 - [ ] **Change the temp admin password** for `Peter`. _(Deferred by user 2026-07-18 — still a pre-launch security item; do before wide launch.)_
 - [ ] Optional: multi-week level progression; reminders/notifications.
+- [ ] **Teach the founder how to use PostHog** — walkthrough of funnels, retention, the
+  self-driving inbox (`eu.posthog.com/project/227058`), and reading the 5 events. _(User requested 2026-07-18.)_
+- [ ] **Before launch (part of the ЕООД gate):** disclose **PostHog (EU) as a data processor**
+  in the privacy policy + sign its DPA; decide whether to keep `enable_exception_autocapture`.
+- [ ] **Recreate the venv** — it broke on the `moiat_plan_50/`→`1Step/` rename (pip shebang points
+  at the old path). Works via `./venv/bin/python -m pip …`; cleanest is a fresh `python -m venv`.
 - [ ] Rename the outer PyCharm workspace folder `PythonProject/` → `1Step/` (user; it's the live CWD + drives Claude's memory path). Optional: rename GitHub repo `moiat-plan-50` → 1Step.
 
 ---
 
 ## Latest (2026-07-18)
+- **PostHog analytics (EU) instrumented** via `@posthog/wizard` self-driving (project 227058,
+  `eu.posthog.com`). Server-side events in `plans/views.py`: `questionnaire_completed`,
+  `daily_action_completed`, `plan_downloaded`, `feedback_submitted` (+ a `.set`); client init in
+  `plans/apps.py`; `PosthogContextMiddleware` in settings. All events are **PII-safe**
+  (pseudonymous `response-{pk}`/user-pk ids; no names/emails/health answers). Keys live in
+  `.env` (gitignored) + Railway `1-step App`/web (`POSTHOG_API_KEY`, `POSTHOG_HOST`).
+  **Hardened** `apps.py` so a missing key disables the client instead of crashing (wizard's
+  raw `os.environ[...]` would KeyError; also fixed its `api_key=`→`project_api_key=` for
+  posthog 7.x). `enable_exception_autocapture` is ON only when configured — **review before
+  launch** (tracebacks could carry health context). Note: `self-driving` is PostHog's
+  autonomous agent (inbox/scouts), broader than plain funnel analytics.
 - **Terminology rebrand крачка/крачки → стъпка/стъпки** across all code + docs (templates,
   `step_engine.py`, `ai_companion.py`, `tests.py`, `knowledge_base.json`, and the `.md` docs).
   Motto is now **„Една стъпка. Всеки ден."** (founder chose the full rebrand). Brand name

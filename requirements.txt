@@ -7,4 +7,5 @@ psycopg2-binary>=2.9
 dj-database-url>=2.1
 whitenoise>=6.6
 anthropic>=0.69
+posthog>=7.26,<8
 django-allauth[socialaccount]>=65,<66
