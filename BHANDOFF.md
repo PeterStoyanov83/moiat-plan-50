@@ -66,8 +66,11 @@ Funnel + retention + willingness-to-pay. Data is in Django admin (`/admin/`):
 ## Legal / trust (business view; tech in HANDOFF)
 - Health data (age, weight, health notes) = **GDPR special category** → consent checkbox
   + `/privacy` page already live.
-- **[ФОУНДЪР] / action:** privacy-policy **contact email** still a placeholder — fill before
-  any real marketing push. Decide data controller identity (personal vs. company/ЕООД).
+- Privacy-policy **contact email** filled: `info@najivo.bg` (2026-07-18).
+- **⛔ LAUNCH GATE (decided 2026-07-18):** hold launch to real users until the **ЕООД is
+  registered** — no entity exists yet, so the privacy policy can't name a data controller.
+  Register at brra.bg (~160 лв, 1–2 days; see `NaJivo — Правна структура.pdf`), then add
+  controller name + ЕИК + седалище. No real 50+ health data collected before this.
 - Not medical advice — disclaimer present; keep all copy in "general wellbeing" language.
 
 ## Roadmap (business milestones, not features)

@@ -73,7 +73,7 @@ onestep/settings.py     # allauth + google + email/password + email backend + ha
 | `DATABASE_URL` | Postgres (persistent) | ✅ (auto) |
 | `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_SECRET` | shows „Влез с Google" | ✅ set |
 | `ANTHROPIC_API_KEY` | activates AI companion (else rule-based). Opt: `AI_COMPANION_MODEL`, `AI_COMPANION_TIMEOUT` | ✅ set |
-| `EMAIL_HOST` (+ `EMAIL_HOST_USER`/`PASSWORD`/`PORT`, `DEFAULT_FROM_EMAIL`) | **password-reset emails** (SMTP; console fallback) | ⛔ NOT set — reset emails won't deliver until added |
+| `EMAIL_HOST` (+ `EMAIL_HOST_USER`/`PASSWORD`/`PORT`, `DEFAULT_FROM_EMAIL`) | **password-reset emails** (SMTP; console fallback) | ✅ set 2026-07-18 — **Resend SMTP** (`smtp.resend.com:587`, user `resend`, pwd = Najivo `RESEND_API_KEY` reused from Railway `pleasant-art`/Bileti; from `1Step <info@najivo.bg>`, najivo.bg domain already verified in Resend). Verified via `manage.py sendtestemail`. |
 
 Deploy: push to `main` → Railway auto-builds (Dockerfile) → `start.sh` runs `migrate` + gunicorn.
 Healthcheck fix (historical): `ALLOWED_HOSTS` always appends `.railway.app`; no `SECURE_SSL_REDIRECT` (keeps internal healthcheck 2xx).
@@ -89,9 +89,10 @@ Healthcheck fix (historical): `ALLOWED_HOSTS` always appends `.railway.app`; no 
 ---
 
 ## TODO / backlog
-- [ ] **Fill privacy contact** placeholder in `templates/plans/privacy.html` (`[ДОПЪЛНЕТЕ…]`) before wide launch.
-- [ ] **SMTP** (`EMAIL_HOST` …) so password-reset emails actually send.
-- [ ] **Change the temp admin password** for `Peter`.
+- [x] **Fill privacy contact** — `plans/templates/plans/privacy.html` now shows `info@najivo.bg` (2026-07-18).
+- [ ] **⛔ LAUNCH BLOCKER — register the ЕООД, then add the data-controller identity to the privacy policy.** Decided 2026-07-18: hold launch to real users until the ЕООД exists (no entity registered yet — see `~/Downloads/NaJivo — Правна структура.pdf`; register at brra.bg, ~160 лв, 1–2 days). Then add controller name + ЕИК + седалище to `privacy.html`. Do NOT collect real users' health data before this.
+- [x] **SMTP** — Resend SMTP wired on Railway `1-step App`/web (from `1Step <info@najivo.bg>`); verified 2026-07-18. Optional: confirm a live reset via `/accounts/password/reset/`.
+- [ ] **Change the temp admin password** for `Peter`. _(Deferred by user 2026-07-18 — still a pre-launch security item; do before wide launch.)_
 - [ ] Optional: multi-week level progression; reminders/notifications.
 - [ ] Rename the outer PyCharm workspace folder `PythonProject/` → `1Step/` (user; it's the live CWD + drives Claude's memory path). Optional: rename GitHub repo `moiat-plan-50` → 1Step.
 
