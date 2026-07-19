@@ -364,6 +364,18 @@ class ReflectionTests(TestCase):
         c.post(reverse('reflect'), {'answer': 'готово'})
         self.assertTrue(c.get(reverse('ritual')).context['reflection_done'])
 
+    def test_journal_lists_only_answered_entries(self):
+        from .reflection import save_reflection
+        c = Client()
+        r = make_response()
+        s = c.session; s['response_id'] = r.pk; s.save()
+        save_reflection(r, 'хубав ден', today=date(2026, 7, 18))
+        save_reflection(r, '', today=date(2026, 7, 17))          # skipped/empty → not shown
+        page = c.get(reverse('reflections'))
+        self.assertEqual(page.status_code, 200)
+        entries = list(page.context['entries'])
+        self.assertEqual([e.answer for e in entries], ['хубав ден'])
+
 
 class BehaviorTests(TestCase):
     """Behavior Engine (bos/engines/01): level themes + weakest-habit adaptation."""

@@ -105,6 +105,12 @@ Healthcheck fix (historical): `ALLOWED_HOSTS` always appends `.railway.app`; no 
 ---
 
 ## Latest (2026-07-19)
+- **Reflection UI redesigned + a journal to revisit.** The end-of-ritual reflection is now a calm,
+  intentional moment (gentle divider, softer larger input, readable placeholder, delayed fade-in so
+  the celebration lands first, non-shaming thanks). New **`/reflections/` journal** (`views.reflections`,
+  `reflections.html`) — a warm, flowing list (not boxed cards) of past answered reflections with an
+  empty state; linked from the progress page under the tree. Built with the impeccable craft rules
+  (contrast, reduced-motion, no slop). 45/45 green.
 - **Verification — server `/api/verify/` endpoint built** (`views.verify_action`, `POST api/verify/`).
   A client posts one action's evidence (`measured`/`claimed`, `minutes`, `confidence`, or `confirmed`);
   `verification.verify()` resolves it (sensor/timer/location/photo/confirm) with gentle anti-cheat

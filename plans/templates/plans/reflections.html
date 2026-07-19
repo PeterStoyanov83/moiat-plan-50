@@ -1,0 +1,61 @@
+{% load static %}<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Твоите размисли — 1Step</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--green:#2E7D32;--green-d:#1B5E20;--cream:#FBF7EE;--cream-soft:#FEFCF7;--ink:#22302A;--muted:#5F6F66;}
+  *{font-family:'Nunito',sans-serif}
+  html,body{background:var(--cream);color:var(--ink);margin:0}
+  .wrap{max-width:32rem;margin:0 auto;min-height:100vh;padding:2.25rem 1.5rem 6.5rem}
+  .lede{color:var(--muted);line-height:1.7}
+  /* Journal: flowing entries, hairline dividers — not boxed cards. */
+  .entry{padding:1.6rem 0;border-bottom:1px solid #EEE6D6}
+  .entry:last-of-type{border-bottom:none}
+  .entry .day{font-size:.82rem;font-weight:700;color:var(--green);letter-spacing:.01em}
+  .entry .q{font-size:1rem;color:var(--muted);font-style:italic;margin:.35rem 0 .5rem;text-wrap:pretty}
+  .entry .a{font-size:1.22rem;line-height:1.55;color:var(--ink);text-wrap:pretty}
+  .quote{color:#D9C7A0;font-size:1.6rem;line-height:0;vertical-align:-0.35rem;margin-right:.15rem}
+  .rise{animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
+  @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .leaf-empty{width:4.5rem;height:4.5rem;margin:0 auto 1.25rem;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 50% 45%,#EAF4EB 0%,#F3EFE2 75%)}
+  nav.tab{position:fixed;bottom:0;inset-inline:0;max-width:28rem;margin:0 auto;background:rgba(254,252,247,.94);backdrop-filter:blur(6px);
+    border-top:1px solid #EFE7D7;padding:.6rem 1.5rem;display:flex;justify-content:space-between;font-size:.72rem;font-weight:700;color:var(--muted);z-index:1030}
+  nav.tab a{display:flex;flex-direction:column;align-items:center;gap:.15rem;text-decoration:none;color:inherit}
+  nav.tab a.active{color:var(--green)}
+  @media (prefers-reduced-motion:reduce){.rise{animation:none}}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    {% include 'plans/_topnav.html' %}
+    <h1 class="text-3xl font-extrabold mb-1 rise">Твоите размисли</h1>
+    <p class="lede mb-6 rise">Малки мисли от твоите дни. Тук остават, за да се връщаш към тях{% if greeting_name %}, {{ greeting_name }}{% endif %}.</p>
+
+    {% for e in entries %}
+    <article class="entry rise" style="animation-delay:{{ forloop.counter0 }}0ms">
+      <div class="day">{{ e.date|date:"j E Y" }}</div>
+      <p class="q">{{ e.question }}</p>
+      <p class="a"><span class="quote">„</span>{{ e.answer }}</p>
+    </article>
+    {% empty %}
+    <div class="text-center rise" style="padding:3rem 1rem 1rem">
+      <div class="leaf-empty">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 19c0-8 6-14 14-14 0 8-6 14-14 14z"/><path d="M8.5 15.5c3-3 5.5-5 8.5-7"/>
+        </svg>
+      </div>
+      <p class="text-xl font-extrabold mb-1">Още няма размисли</p>
+      <p class="lede">В края на всеки ден те чака един тих въпрос. Каквото споделиш, ще расте тук.</p>
+      <a href="{% url 'ritual' %}" style="display:inline-block;margin-top:1.5rem;background:var(--green);color:#fff;border-radius:50px;padding:.8rem 2rem;font-weight:800;text-decoration:none;">Към днешната стъпка</a>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% include 'plans/_bottomnav.html' %}
+</body>
+</html>

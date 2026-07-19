@@ -29,6 +29,8 @@
     font-weight:800;display:flex;align-items:center;justify-content:center}
   .ico{width:3.2rem;height:3.2rem;flex:none;border-radius:1rem;display:flex;align-items:center;justify-content:center}
   .btn-swap{background:transparent;color:var(--muted);font-size:1.05rem;padding:.85rem;font-weight:700;border:none;cursor:pointer;width:100%}
+  #reflectInput::placeholder{color:#6E6355}
+  #reflectInput:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 .2rem rgba(46,125,50,.12)}
   #flash{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(251,247,238,.92);backdrop-filter:blur(3px);z-index:40;text-align:center}
   #flash.show{display:flex;animation:fadeUp .35s ease both}
   .pop{animation:pop .6s cubic-bezier(.2,1.5,.4,1) both}@keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
@@ -105,16 +107,21 @@
     <p class="pop text-lg text-[color:var(--green)] font-bold mt-6">Утре ще продължим</p>
 
     {% if not reflection_done %}
-    <div id="reflectBlock" class="pop w-full mt-8" style="display:none;max-width:22rem;">
-      <p class="text-center text-[color:var(--muted)] mb-2">{{ reflection_question }}</p>
+    <div id="reflectBlock" class="w-full mt-10" style="display:none;max-width:24rem;opacity:0;transition:opacity .7s ease;">
+      <div style="width:2.5rem;height:1px;background:#E2D7BF;margin:0 auto 1.6rem;"></div>
+      <p class="text-center" style="font-size:1.15rem;font-weight:700;color:var(--ink);line-height:1.5;margin-bottom:1.1rem;text-wrap:pretty;">{{ reflection_question }}</p>
       <input type="hidden" id="reflectQuestion" value="{{ reflection_question }}">
       <textarea id="reflectInput" rows="3" placeholder="Няколко думи, ако искаш…"
-        class="w-full" style="font-family:inherit;font-size:1.05rem;border:1.5px solid #E7DECC;border-radius:1rem;padding:.75rem;background:#fff;color:var(--ink);"></textarea>
-      <div class="flex gap-2 mt-2 justify-center">
-        <button id="reflectSave" style="background:var(--green);color:#fff;border:none;border-radius:50px;padding:.6rem 1.8rem;font-weight:700;cursor:pointer;">Запази</button>
-        <button id="reflectSkip" style="background:transparent;color:var(--muted);border:none;font-weight:700;cursor:pointer;">Пропусни</button>
+        style="width:100%;font-family:inherit;font-size:1.08rem;line-height:1.5;border:1.5px solid #E7DECC;border-radius:1.1rem;padding:.9rem 1rem;background:var(--cream-soft);color:var(--ink);resize:none;box-shadow:0 4px 16px rgba(34,48,42,.04);"></textarea>
+      <div class="flex flex-col items-center gap-1 mt-4">
+        <button id="reflectSave" style="background:var(--green);color:#fff;border:none;border-radius:50px;padding:.8rem 2.5rem;font-weight:800;font-size:1.05rem;cursor:pointer;box-shadow:0 8px 22px rgba(46,125,50,.18);">Запази</button>
+        <button id="reflectSkip" style="background:transparent;color:var(--muted);border:none;font-weight:700;padding:.5rem;cursor:pointer;">Пропусни за днес</button>
       </div>
-      <p id="reflectThanks" class="text-center text-[color:var(--green)] font-bold mt-3" style="display:none;">Благодаря, че сподели. 🌱</p>
+      <div id="reflectThanks" style="display:none;text-align:center;">
+        <div style="font-size:2rem;margin-bottom:.3rem;">🌱</div>
+        <p style="color:var(--green);font-weight:800;font-size:1.12rem;">Благодаря, че сподели.</p>
+        <p style="color:var(--muted);">Мисълта ти вече расте в „Твоите размисли“.</p>
+      </div>
     </div>
     {% endif %}
   </div>
@@ -154,7 +161,11 @@
   }
   async function post(url,body){const r=await fetch(url,{method:'POST',headers:{'X-CSRFToken':CSRF,'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(body)});return r.json();}
   function finish(msg){document.getElementById('mainWrap').style.display='none';const f=document.getElementById('final');f.classList.add('show');if(msg)document.getElementById('finalMsg').innerHTML=msg;burst();showReflection();}
-  function showReflection(){const rb=document.getElementById('reflectBlock');if(rb)rb.style.display='block';}
+  function showReflection(){
+    const rb=document.getElementById('reflectBlock');if(!rb)return;
+    // Let the celebration land first, then the reflection gently appears.
+    setTimeout(()=>{rb.style.display='block';requestAnimationFrame(()=>{rb.style.opacity='1';});},1000);
+  }
   (function(){
     const save=document.getElementById('reflectSave'), skip=document.getElementById('reflectSkip');
     if(!save) return;   // already reflected today

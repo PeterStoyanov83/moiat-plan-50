@@ -293,6 +293,20 @@ def progress(request):
     return render(request, 'plans/progress.html', context)
 
 
+def reflections(request):
+    """Твоите размисли — a calm journal of past reflections to revisit."""
+    response = _session_response(request)
+    if response is None:
+        return redirect('questionnaire')
+    entries = (response.reflections.exclude(answer='').order_by('-date'))
+    plan = getattr(response, 'plan', None)
+    return render(request, 'plans/reflections.html', {
+        'greeting_name': response.first_name or '',
+        'entries': entries,
+        'plan_id': plan.pk if plan else None,
+    })
+
+
 def profile(request):
     """Account profile — info, progress, and links to the standard auth actions."""
     if not request.user.is_authenticated:

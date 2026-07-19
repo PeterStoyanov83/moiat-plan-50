@@ -11,6 +11,7 @@ urlpatterns = [
     path('ritual/reflect/', views.reflect, name='reflect'),
     path('api/verify/', views.verify_action, name='verify_action'),
     path('progress/', views.progress, name='progress'),
+    path('reflections/', views.reflections, name='reflections'),
     path('profile/', views.profile, name='profile'),
     path('result/<int:plan_id>/', views.result, name='result'),
     path('download/<int:plan_id>/', views.download_pdf, name='download_pdf'),
