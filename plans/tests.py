@@ -147,20 +147,41 @@ class AICompanionTests(TestCase):
     def test_falls_back_to_engine_when_disabled(self):
         r = make_response()
         with mock.patch.object(ai_companion, 'enabled', return_value=False):
-            step, message = ai_companion.pick_opening_step(r)
+            step, message, reflection = ai_companion.pick_opening_step(r)
         self.assertIsNotNone(step)
         self.assertIn(step['category'], {se.MOVEMENT, se.NUTRITION, se.SOCIAL, se.FINANCE})
-        self.assertIsNone(message)   # no AI line when disabled
+        self.assertIsNone(message)      # no AI line when disabled
+        self.assertIsNone(reflection)   # → ritual uses the rule-based reflection pool
 
     def test_uses_ai_choice_when_enabled(self):
         r = make_response()
         with mock.patch.object(ai_companion, 'enabled', return_value=True), \
-             mock.patch.object(ai_companion, '_ai_choose', return_value=(0, 'Днес една малка стъпка.')):
-            step, message = ai_companion.pick_opening_step(r)
-        # index 0 of the candidate list, with the AI's warm line
+             mock.patch.object(ai_companion, '_ai_choose',
+                               return_value=(0, 'Днес една малка стъпка.', 'Как се чувстваш днес?')):
+            step, message, reflection = ai_companion.pick_opening_step(r)
         candidates = [s for s in se.eligible_steps(r)]
         self.assertEqual(step['text'], candidates[0]['text'])
         self.assertEqual(message, 'Днес една малка стъпка.')
+        self.assertEqual(reflection, 'Как се чувстваш днес?')   # AI-written reflection
+
+    def test_recent_answers_feed_the_learning_loop(self):
+        from datetime import timedelta
+        from .reflection import recent_answers, save_reflection
+        r = make_response()
+        today = date(2026, 7, 19)
+        save_reflection(r, 'вчера бях изморен', today=today - timedelta(days=1))
+        save_reflection(r, '', today=today - timedelta(days=2))          # empty → skipped
+        save_reflection(r, 'днешно', today=today)                        # today → excluded
+        got = recent_answers(r, today=today)
+        self.assertEqual(got, ['вчера бях изморен'])
+
+    def test_reflect_stores_the_shown_question(self):
+        from .models import Reflection
+        c = Client()
+        r = make_response()
+        s = c.session; s['response_id'] = r.pk; s.save()
+        c.post(reverse('reflect'), {'answer': 'добре', 'question': 'Какво те зарадва?'})
+        self.assertEqual(Reflection.objects.get(response=r).question, 'Какво те зарадва?')
 
 
 class GoogleAccountTests(TestCase):

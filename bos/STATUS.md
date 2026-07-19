@@ -13,7 +13,7 @@ Legend: ✅ done · 🟢 MVP-complete (minor/post-MVP open) · 🟡 partial · �
 | 4 Level | 🟢 | `progression.py`, `views.py`, `Level` | mastery (40/30/20/10); band checks; promote/extend; **lazy nightly re-eval on ritual load; promote/extend messages surfaced (ritual banner + `step_done` JSON); level-up signal → progress celebration** | true scheduled cron (currently lazy on load); explicit tree blossom animation (→ Tree Engine) |
 | 5 Recovery | 🟢 | `tree_state.py`, `daily.py`, `UserProgram.recovery_until` | inactivity days; 7-day window opens at ≥14 idle; **recovery multiplier applied in daily.py (effort metrics only — sleep/hydration never reduced); linear taper 0.4→1.0; gentle non-shaming welcome-back copy** | nightly auto-open (currently opens on next tree read); recovery→tree "welcome back" visual |
 | 6 Tree | ✅ | `static/plans/tree-engine.js` (as-is), `tree_state.py`, `progress.html` | action-driven growth; level/health/dormant; zoom reveal; BG labels; **level-up animates the trunk/branches (mount prev level → `setLevel` to new, watched on the progress page)** | long-term events (birds/fruit/seasonal); recovery-renewal visual on return |
-| 7 AI Planner | 🟡 | `ai_companion.py`, `daily.py`, `reflection.py`, `ritual.html` | rule-based 3 actions + why; AI warm line w/ fallback; **reflection question (rule-based pool) + storage (`Reflection` model) + end-of-ritual UI + admin** | `/api/today` full morning payload; weather/stability; AI-written reflection |
+| 7 AI Planner | 🟢 | `ai_companion.py`, `reflection.py`, `daily.py`, `ritual.html` | 3 actions + why; AI warm line + **AI-written reflection question (same single call) + learning loop (recent reflection answers fed into the prompt)**; rule-based fallback throughout; reflection stored per day + admin | `/api/today` full payload (mobile, Track B); weather (deferred) |
 
 ## Cross-cutting / not yet built
 - **Mobile app + sensor bridge** (HealthKit / Google Fit / Health Connect / GPS / camera).
@@ -30,8 +30,9 @@ Legend: ✅ done · 🟢 MVP-complete (minor/post-MVP open) · 🟡 partial · �
    page). _Remaining: long-term events (birds/fruit/seasonal); recovery-renewal visual._
 3. **Recovery (5) → 100%:** nightly auto-open of the recovery window (don't wait for a tree read);
    recovery → tree "welcome back" visual.
-4. **AI Planner (7) → 100% (web parts):** AI-written reflection question (fallback to the rule pool);
-   feed stored reflections back into the companion prompt (learning loop); honor habit stability in selection.
+4. ✅ **AI Planner (7) — web parts:** AI-written reflection question (rule-pool fallback) + learning
+   loop (recent reflections fed into the prompt), both in the existing single call. Habit-stability
+   selection is handled by Behavior (1). _Remaining: `/api/today` (mobile, Track B)._
 5. **Behavior (1) → 100%:** finer per-level difficulty curves (per-action/category, beyond linear scaling).
 6. **Knowledge (2) → 100% (web parts):** grow library 100 → hundreds; broaden contraindication inference.
 
@@ -50,5 +51,5 @@ verification once there's an app. Weather + mobile are deliberately deferred._
 `DailyAssignment` · `Reflection` (migrations `0007` schema, `0008` seed, `0011-0012` library, `0013` reflection).
 
 ## Verification of current build
-`python manage.py test plans` → 37/37 green. Local dev DB = sqlite. The ritual runs the
+`python manage.py test plans` → 39/39 green. Local dev DB = sqlite. The ritual runs the
 new ActionDef flow end-to-end (task+why → verified ActionLog → tree growth).

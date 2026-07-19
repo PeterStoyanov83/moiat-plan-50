@@ -105,6 +105,13 @@ Healthcheck fix (historical): `ALLOWED_HOSTS` always appends `.railway.app`; no 
 ---
 
 ## Latest (2026-07-19)
+- **AI Planner — reflection now AI-written + a learning loop.** The companion's single Claude call
+  (`ai_companion._ai_choose`) now returns `{index, message, reflection}` — the warm line **and** the
+  end-of-day reflection question, both informed by the user's **recent reflection answers**
+  (`reflection.recent_answers`, fed into the prompt). `pick_opening_step` returns a 3-tuple; ritual
+  falls back to the rule-based pool when AI is off/fails. The reflect endpoint now stores the exact
+  question shown. Habit-stability selection already lives in Behavior (1). No schema change. 39/39
+  green. AI Planner → 🟢. This is the companion "learning" substrate the future AI chat builds on.
 - **Tree Engine — level-up now animates.** `progress.html` consumes the Level engine's
   `celebrate_level` signal: it mounts the tree one level below and calls `tree.setLevel(new, {animate})`
   after the page settles, so the user **watches the trunk/branches grow** into the new level (major

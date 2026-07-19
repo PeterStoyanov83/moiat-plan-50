@@ -107,6 +107,7 @@
     {% if not reflection_done %}
     <div id="reflectBlock" class="pop w-full mt-8" style="display:none;max-width:22rem;">
       <p class="text-center text-[color:var(--muted)] mb-2">{{ reflection_question }}</p>
+      <input type="hidden" id="reflectQuestion" value="{{ reflection_question }}">
       <textarea id="reflectInput" rows="3" placeholder="Няколко думи, ако искаш…"
         class="w-full" style="font-family:inherit;font-size:1.05rem;border:1.5px solid #E7DECC;border-radius:1rem;padding:.75rem;background:#fff;color:var(--ink);"></textarea>
       <div class="flex gap-2 mt-2 justify-center">
@@ -159,7 +160,8 @@
     if(!save) return;   // already reflected today
     save.addEventListener('click',async()=>{
       const answer=document.getElementById('reflectInput').value;
-      try{await post(REFLECT_URL,{answer});}catch(e){}
+      const question=document.getElementById('reflectQuestion').value;
+      try{await post(REFLECT_URL,{answer,question});}catch(e){}
       document.getElementById('reflectInput').style.display='none';
       save.style.display='none';skip.style.display='none';
       document.getElementById('reflectThanks').style.display='block';

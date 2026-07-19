@@ -33,6 +33,15 @@ def todays_reflection(response, today=None):
     return Reflection.objects.filter(response=response, date=today).first()
 
 
+def recent_answers(response, limit=3, today=None):
+    """The user's last few non-empty reflection answers (excluding today) — context
+    the AI companion can learn from. Most recent first."""
+    today = today or timezone.localdate()
+    qs = (Reflection.objects.filter(response=response)
+          .exclude(answer='').exclude(date=today).order_by('-date')[:limit])
+    return [r.answer for r in qs]
+
+
 def save_reflection(response, answer, today=None, question=None):
     """Store (or update) today's reflection answer. Idempotent per day."""
     today = today or timezone.localdate()

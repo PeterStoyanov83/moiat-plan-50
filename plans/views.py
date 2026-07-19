@@ -91,7 +91,7 @@ def ritual(request):
         return redirect('questionnaire')
     # AI companion writes a warm opening line (when enabled). Actions now come
     # from the ActionDef library (core habits + missions), scaled to the level.
-    _, companion_message = pick_opening_step(response)
+    _, companion_message, ai_reflection = pick_opening_step(response)
     from .daily import today_actions, welcome_back_message
     from .reflection import question_for, todays_reflection
     from .models import UserProgram
@@ -112,7 +112,7 @@ def ritual(request):
         'progress': json.dumps(today_progress(response)),
         'plan_id': plan.pk if plan else None,
         'response_id': response.pk,
-        'reflection_question': question_for(response),
+        'reflection_question': ai_reflection or question_for(response),
         'reflection_done': todays_reflection(response) is not None,
         'level_event': level_event,
     }
@@ -136,7 +136,8 @@ def reflect(request):
     if response is None:
         return JsonResponse({'error': 'no-session'}, status=400)
     from .reflection import save_reflection
-    save_reflection(response, request.POST.get('answer', ''))
+    save_reflection(response, request.POST.get('answer', ''),
+                    question=request.POST.get('question') or None)
     return JsonResponse({'ok': True})
 
 
