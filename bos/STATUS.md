@@ -7,7 +7,7 @@ Legend: ✅ done · 🟢 MVP-complete (minor/post-MVP open) · 🟡 partial · �
 
 | Engine | Status | Code | Done | Open |
 |--------|--------|------|------|------|
-| 1 Behavior | 🟡 | `models.py` (Level, UserProgram, ActionDef), `daily.py`, `migrations/0008` | 20 levels + bands seeded; core/mission split; level-scaled targets; ≥3 actions/day | per-level mission themes; behavioral adaptation to weakest habits |
+| 1 Behavior | 🟢 | `models.py` (Level, UserProgram, ActionDef), `daily.py`, `behavior.py`, `migrations/0008` | 20 levels + bands; core/mission split; level-scaled targets; ≥3/day; **per-level mission themes (categories unlock by level) + weakest-habit adaptation (mission order biased by category stability, persisted to `HabitStability`)** | finer per-level difficulty curves |
 | 2 Knowledge | 🟡 | `models.py::ActionDef`, `daily.py`, `migrations/0008-0012` | **full metadata**; **contraindication gating + safe substitution live**; **100 actions across all 7 categories** (0011-0012); **refined inference** — 5 tags (joint/injury/**cardiac/balance/respiratory**); metadata contract enforced by tests | grow further (100 → hundreds); **wire weather (deferred to later version)** |
 | 3 Verification | 🟡 | `verification.py`, `models.py::ActionLog` | 5 verifier types + anti-cheat; web = trust-based confirm | `/api/verify/sensor` + `/api/verify/photo`; wearable/HealthKit/Fit/GPS adapters |
 | 4 Level | 🟡 | `progression.py`, `Level` | mastery score (40/30/20/10); band checks; promote/extend on completion | nightly re-eval; UI messages; level-up → tree event |
@@ -26,5 +26,5 @@ Legend: ✅ done · 🟢 MVP-complete (minor/post-MVP open) · 🟡 partial · �
 `DailyAssignment` · `Reflection` (migrations `0007` schema, `0008` seed, `0011-0012` library, `0013` reflection).
 
 ## Verification of current build
-`python manage.py test plans` → 31/31 green. Local dev DB = sqlite. The ritual runs the
+`python manage.py test plans` → 34/34 green. Local dev DB = sqlite. The ritual runs the
 new ActionDef flow end-to-end (task+why → verified ActionLog → tree growth).

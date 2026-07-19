@@ -342,3 +342,43 @@ class ReflectionTests(TestCase):
         self.assertFalse(page.context['reflection_done'])
         c.post(reverse('reflect'), {'answer': 'готово'})
         self.assertTrue(c.get(reverse('ritual')).context['reflection_done'])
+
+
+class BehaviorTests(TestCase):
+    """Behavior Engine (bos/engines/01): level themes + weakest-habit adaptation."""
+
+    def test_mission_themes_unlock_with_level(self):
+        from .behavior import emphasized_categories
+        self.assertIn('movement', emphasized_categories(1))
+        self.assertNotIn('financial', emphasized_categories(1))   # not yet
+        self.assertIn('social', emphasized_categories(8))
+        self.assertIn('financial', emphasized_categories(12))
+
+    def test_category_stability_from_history(self):
+        from datetime import timedelta
+        from .behavior import category_stability
+        from .models import ActionDef, ActionLog
+        r = make_response()
+        walk = ActionDef.objects.get(slug='walk_steps')          # movement
+        today = date(2026, 7, 19)
+        for i in range(3):
+            ActionLog.objects.create(response=r, action=walk, date=today - timedelta(days=i + 1),
+                                     status=ActionLog.CONFIRMED)
+        stab = category_stability(r, today)
+        self.assertEqual(stab['movement'], 75)                   # 3 * 25
+        self.assertNotIn('mind', stab)                           # no history → weakest
+
+    def test_selection_biases_toward_weakest_habit(self):
+        # Strong movement history → movement missions should NOT lead the variety.
+        from datetime import timedelta
+        from .daily import today_actions
+        from .models import ActionDef, ActionLog
+        r = make_response()
+        walk = ActionDef.objects.get(slug='walk_steps')
+        today = date(2026, 7, 19)
+        for i in range(4):
+            ActionLog.objects.create(response=r, action=walk, date=today - timedelta(days=i + 1),
+                                     status=ActionLog.CONFIRMED)
+        missions = [c for c in today_actions(r, today=today, n=8) if c['type'] == 'growth_mission']
+        self.assertTrue(missions)
+        self.assertNotEqual(missions[0]['category'], 'movement')

@@ -1,5 +1,13 @@
 from django.contrib import admin
-from .models import QuestionnaireResponse, UserPlan, Feedback, StepCompletion, Reflection
+from .models import (QuestionnaireResponse, UserPlan, Feedback, StepCompletion,
+                     Reflection, HabitStability)
+
+
+@admin.register(HabitStability)
+class HabitStabilityAdmin(admin.ModelAdmin):
+    list_display = ['id', 'response', 'key', 'stability', 'updated_at']
+    list_filter = ['key']
+    ordering = ['response', '-stability']
 
 
 @admin.register(Reflection)

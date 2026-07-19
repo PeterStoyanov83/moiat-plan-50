@@ -105,6 +105,12 @@ Healthcheck fix (historical): `ALLOWED_HOSTS` always appends `.railway.app`; no 
 ---
 
 ## Latest (2026-07-19)
+- **Behavior Engine — mission themes + weakest-habit adaptation** (`plans/behavior.py`, wired into
+  `daily.today_actions`). `emphasized_categories(level)` = per-level curriculum (foundations first;
+  nutrition/sleep @L4, social @L8, financial @L12). `category_stability()` scores each category from
+  recent `ActionLog` completions (persisted to `HabitStability`, now in admin). Missions are ordered
+  theme-first → weakest-category-first → stable daily shuffle; **core habits still lead, untouched**.
+  No schema change. Behavior → 🟢. 34/34 green.
 - **AI Planner — daily reflection question shipped** (the precursor to any AI chat). New
   `Reflection` model (`migrations/0013`, one per response/day, in admin) + `plans/reflection.py`
   (rule-based question pool, stable per day). Shown on the ritual's end screen (`ritual.html`

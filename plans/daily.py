@@ -9,6 +9,7 @@ import random
 from django.utils import timezone
 from .models import ActionDef, ActionLog, UserProgram
 from .tree_state import in_recovery, recovery_factor
+from .behavior import order_missions
 
 ICON_BY_CATEGORY = {
     'movement': 'walk', 'nutrition': 'salad', 'hydration': 'water',
@@ -130,7 +131,9 @@ def today_actions(response, today=None, n=3):
     core = [a for a in active if a.type == ActionDef.CORE]
     missions = [a for a in active if a.type == ActionDef.MISSION]
     rng = random.Random((response.pk or 0) + today.toordinal())
-    rng.shuffle(missions)
+    # Behavior engine: order missions by level theme + weakest-habit adaptation
+    # (core foundations still lead, untouched).
+    missions = order_missions(response, missions, level, today, rng)
 
     picked, seen = [], set()
     for a in core + missions:                 # core foundations first, then variety
