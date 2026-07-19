@@ -59,6 +59,21 @@ def in_recovery(program, today):
     return bool(program and program.recovery_until and today <= program.recovery_until)
 
 
+RECOVERY_WINDOW_DAYS = 7
+RECOVERY_MIN_FACTOR = 0.4        # start at ~40% of target on return...
+
+
+def recovery_factor(program, today):
+    """Target multiplier during the recovery window (spec §5: reduce workload,
+    then restore momentum). Starts at RECOVERY_MIN_FACTOR on the day of return and
+    tapers linearly back to 1.0 over RECOVERY_WINDOW_DAYS. 1.0 when not recovering."""
+    if not in_recovery(program, today):
+        return 1.0
+    days_left = max(0, min(RECOVERY_WINDOW_DAYS, (program.recovery_until - today).days))
+    progress = (RECOVERY_WINDOW_DAYS - days_left) / RECOVERY_WINDOW_DAYS   # 0 → 1
+    return RECOVERY_MIN_FACTOR + (1 - RECOVERY_MIN_FACTOR) * progress
+
+
 def compute_tree_state(response, today=None, persist=True):
     """Derive + (optionally) cache the tree state for a response."""
     today = today or datetime.date.today()

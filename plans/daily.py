@@ -8,11 +8,17 @@ gated for safety (Constitution: actions must respect medical limitations).
 import random
 from django.utils import timezone
 from .models import ActionDef, ActionLog, UserProgram
+from .tree_state import in_recovery, recovery_factor
 
 ICON_BY_CATEGORY = {
     'movement': 'walk', 'nutrition': 'salad', 'hydration': 'water',
     'sleep': 'sleep', 'social': 'friend', 'mind': 'stretch', 'financial': 'coin',
 }
+
+# Recovery only reduces *workload* (spec §5). Effort/volume metrics may scale down;
+# restorative metrics (sleep hours, hydration glasses) never do — less sleep/water
+# is not recovery.
+SCALABLE_METRICS = {'steps', 'minutes'}
 
 
 def _title_for(action, target):
@@ -32,8 +38,19 @@ def _title_for(action, target):
     return t
 
 
-def card(action, level):
+def _scaled_target(action, level, factor):
+    """The level target, reduced by the recovery factor for effort metrics only."""
     target = action.target_for_level(level)
+    if target is None or factor >= 1.0 or action.metric not in SCALABLE_METRICS:
+        return target
+    val = float(target) * factor
+    if action.metric == 'steps':
+        return max(1000, int(round(val / 100) * 100))   # nearest 100, floor 1000
+    return max(1, int(round(val)))                       # minutes
+
+
+def card(action, level, factor=1.0):
+    target = _scaled_target(action, level, factor)
     return {
         'id': action.slug,
         'text': _title_for(action, target),   # task
@@ -102,6 +119,7 @@ def today_actions(response, today=None, n=3):
     today = today or timezone.localdate()
     program, _ = UserProgram.objects.get_or_create(response=response)
     level = program.current_level
+    factor = recovery_factor(program, today)   # <1.0 during the recovery window
     done = set(ActionLog.objects.filter(
         response=response, date=today, status__in=ActionLog.COUNTS_AS_DONE,
     ).values_list('action__slug', flat=True))
@@ -125,4 +143,18 @@ def today_actions(response, today=None, n=3):
         picked.append(safe)
         if len(picked) >= n:
             break
-    return [card(a, level) for a in picked]
+    return [card(a, level, factor) for a in picked]
+
+
+def welcome_back_message(response, today=None):
+    """Gentle 'welcome back' line during the recovery window — never shaming
+    (spec §5: missing time is normal; never 'you lost your progress'). None when
+    the user is not returning from a long gap."""
+    today = today or timezone.localdate()
+    program, _ = UserProgram.objects.get_or_create(response=response)
+    if not in_recovery(program, today):
+        return None
+    name = (getattr(response, 'first_name', '') or '').strip()
+    who = f', {name}' if name else ''
+    return (f'Радвам се, че се върна{who}. Нищо не е изгубено — '
+            f'продължаваме спокойно, с по-малки стъпки.')

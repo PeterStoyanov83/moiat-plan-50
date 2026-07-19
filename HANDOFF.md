@@ -104,6 +104,13 @@ Healthcheck fix (historical): `ALLOWED_HOSTS` always appends `.railway.app`; no 
 
 ---
 
+## Latest (2026-07-19)
+- **Recovery Engine wired in.** `tree_state.recovery_factor()` — a linear taper 0.4→1.0 over the
+  7-day recovery window. `daily.py` applies it to targets **only for effort metrics (steps/minutes)**
+  — sleep hours and hydration glasses are never reduced (that's not recovery). `daily.welcome_back_message()`
+  shows a gentle, non-shaming line as the ritual lead on return (spec §5: "missing time is normal").
+  Tests cover the taper, effort-vs-rest scaling, and welcome-back gating. Recovery now 🟢 in STATUS.
+
 ## Latest (2026-07-18)
 - **Knowledge Engine — library grown 8 → 100 actions** (`migrations/0011`+`0012`) across all 7
   categories (movement 19, mind 18, nutrition 17, social 14, sleep 12, financial 11, hydration 9).

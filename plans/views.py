@@ -92,8 +92,10 @@ def ritual(request):
     # AI companion writes a warm opening line (when enabled). Actions now come
     # from the ActionDef library (core habits + missions), scaled to the level.
     _, companion_message = pick_opening_step(response)
-    from .daily import today_actions
+    from .daily import today_actions, welcome_back_message
     choices = today_actions(response)
+    # On return from a long gap, recovery framing leads (gentle, never shaming).
+    companion_message = welcome_back_message(response) or companion_message
     plan = getattr(response, 'plan', None)
     context = {
         'greeting_name': response.first_name or '',

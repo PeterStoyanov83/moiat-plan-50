@@ -257,3 +257,48 @@ class KnowledgeLibraryTests(TestCase):
         r = make_response(health_limitations='често получавам световъртеж')
         slugs = {c['id'] for c in today_actions(r, n=6)}
         self.assertNotIn('balance_practice', slugs)
+
+
+class RecoveryTests(TestCase):
+    """Recovery Engine (bos/engines/05): gentle return after a long gap."""
+
+    def _program(self, recovery_until=None):
+        from .models import UserProgram
+        r = make_response()
+        program, _ = UserProgram.objects.get_or_create(response=r)
+        program.recovery_until = recovery_until
+        program.save()
+        return r, program
+
+    def test_recovery_factor_tapers_from_min_to_full(self):
+        from datetime import timedelta
+        from .tree_state import recovery_factor, RECOVERY_MIN_FACTOR
+        today = date(2026, 7, 19)
+        _, none = self._program(recovery_until=None)
+        self.assertEqual(recovery_factor(none, today), 1.0)                 # not recovering
+        _, fresh = self._program(recovery_until=today + timedelta(days=7))
+        self.assertAlmostEqual(recovery_factor(fresh, today), RECOVERY_MIN_FACTOR)   # day of return
+        _, last = self._program(recovery_until=today)
+        self.assertAlmostEqual(recovery_factor(last, today), 1.0)           # window's last day
+        _, mid = self._program(recovery_until=today + timedelta(days=3))
+        self.assertTrue(RECOVERY_MIN_FACTOR < recovery_factor(mid, today) < 1.0)
+
+    def test_recovery_scales_effort_but_not_rest(self):
+        from .models import ActionDef
+        from .daily import card
+        walk = ActionDef.objects.get(slug='walk_steps')   # metric=steps, level1=2000
+        sleep = ActionDef.objects.get(slug='sleep')        # metric=hours, level1=6
+        self.assertLess(card(walk, 1, factor=0.4)['target'], card(walk, 1, factor=1.0)['target'])
+        self.assertEqual(card(sleep, 1, factor=0.4)['target'], card(sleep, 1, factor=1.0)['target'])
+
+    def test_welcome_back_only_during_recovery_and_never_shames(self):
+        from datetime import timedelta
+        from .daily import welcome_back_message
+        today = date(2026, 7, 19)
+        r_none, _ = self._program(recovery_until=None)
+        self.assertIsNone(welcome_back_message(r_none, today))
+        r_rec, _ = self._program(recovery_until=today + timedelta(days=7))
+        msg = welcome_back_message(r_rec, today)
+        self.assertTrue(msg)
+        for shame in ('загуби', 'провал', 'изостана'):
+            self.assertNotIn(shame, msg.lower())
