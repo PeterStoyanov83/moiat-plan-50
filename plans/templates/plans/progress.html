@@ -23,6 +23,11 @@
 <body>
   <div class="wrap">
     {% include 'plans/_topnav.html' %}
+    {% if celebrate_level %}
+    <div class="fadein" style="background:#EAF4EB;color:var(--green);border:1px solid #CDE8CF;border-radius:1rem;padding:.85rem 1rem;margin-bottom:1rem;font-weight:800;text-align:center;">
+      🎉 Ново ниво {{ celebrate_level }}! Дървото ти порасна.
+    </div>
+    {% endif %}
     <h1 class="text-3xl font-extrabold mb-1 fadein">Твоето дърво</h1>
     <p class="text-[color:var(--muted)] mb-4 fadein">Расте с всяка твоя стъпка, {{ greeting_name|default:"приятелю" }}.</p>
 

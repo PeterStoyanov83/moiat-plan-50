@@ -10,7 +10,7 @@ Legend: ✅ done · 🟢 MVP-complete (minor/post-MVP open) · 🟡 partial · �
 | 1 Behavior | 🟢 | `models.py` (Level, UserProgram, ActionDef), `daily.py`, `behavior.py`, `migrations/0008` | 20 levels + bands; core/mission split; level-scaled targets; ≥3/day; **per-level mission themes (categories unlock by level) + weakest-habit adaptation (mission order biased by category stability, persisted to `HabitStability`)** | finer per-level difficulty curves |
 | 2 Knowledge | 🟡 | `models.py::ActionDef`, `daily.py`, `migrations/0008-0012` | **full metadata**; **contraindication gating + safe substitution live**; **100 actions across all 7 categories** (0011-0012); **refined inference** — 5 tags (joint/injury/**cardiac/balance/respiratory**); metadata contract enforced by tests | grow further (100 → hundreds); **wire weather (deferred to later version)** |
 | 3 Verification | 🟡 | `verification.py`, `models.py::ActionLog` | 5 verifier types + anti-cheat; web = trust-based confirm | `/api/verify/sensor` + `/api/verify/photo`; wearable/HealthKit/Fit/GPS adapters |
-| 4 Level | 🟡 | `progression.py`, `Level` | mastery score (40/30/20/10); band checks; promote/extend on completion | nightly re-eval; UI messages; level-up → tree event |
+| 4 Level | 🟢 | `progression.py`, `views.py`, `Level` | mastery (40/30/20/10); band checks; promote/extend; **lazy nightly re-eval on ritual load; promote/extend messages surfaced (ritual banner + `step_done` JSON); level-up signal → progress celebration** | true scheduled cron (currently lazy on load); explicit tree blossom animation (→ Tree Engine) |
 | 5 Recovery | 🟢 | `tree_state.py`, `daily.py`, `UserProgram.recovery_until` | inactivity days; 7-day window opens at ≥14 idle; **recovery multiplier applied in daily.py (effort metrics only — sleep/hydration never reduced); linear taper 0.4→1.0; gentle non-shaming welcome-back copy** | nightly auto-open (currently opens on next tree read); recovery→tree "welcome back" visual |
 | 6 Tree | ✅ | `static/plans/tree-engine.js` (as-is), `tree_state.py`, `progress.html` | action-driven growth; level/health/dormant; visibility-gated zoom reveal; BG labels | route level-up/long-term events (branches/flowers/birds) explicitly |
 | 7 AI Planner | 🟡 | `ai_companion.py`, `daily.py`, `reflection.py`, `ritual.html` | rule-based 3 actions + why; AI warm line w/ fallback; **reflection question (rule-based pool) + storage (`Reflection` model) + end-of-ritual UI + admin** | `/api/today` full morning payload; weather/stability; AI-written reflection |
@@ -24,10 +24,10 @@ Legend: ✅ done · 🟢 MVP-complete (minor/post-MVP open) · 🟡 partial · �
 ## Path to 100% — remaining work, in order
 
 **Track A — Web MVP (no mobile needed), do these first:**
-1. **Level (4) → 100%:** nightly re-eval (lazy trigger on daily load for MVP, cron later) · level-up
-   UI message · extend-on-non-mastery copy · **emit a level-up event**. ← *in progress*
-2. **Tree (6) → 100%:** consume the level-up event → visible reaction (new branch/flower/bird);
-   route long-term milestones explicitly.
+1. ✅ **Level (4)** — lazy re-eval on load + promote/extend messages (ritual banner + step_done JSON)
+   + level-up signal → progress celebration. _Remaining for full: a true scheduled cron._
+2. **Tree (6) → 100%:** consume the level-up signal → visible reaction (new branch/flower/bird);
+   route long-term milestones explicitly. ← *next*
 3. **Recovery (5) → 100%:** nightly auto-open of the recovery window (don't wait for a tree read);
    recovery → tree "welcome back" visual.
 4. **AI Planner (7) → 100% (web parts):** AI-written reflection question (fallback to the rule pool);
@@ -50,5 +50,5 @@ verification once there's an app. Weather + mobile are deliberately deferred._
 `DailyAssignment` · `Reflection` (migrations `0007` schema, `0008` seed, `0011-0012` library, `0013` reflection).
 
 ## Verification of current build
-`python manage.py test plans` → 34/34 green. Local dev DB = sqlite. The ritual runs the
+`python manage.py test plans` → 37/37 green. Local dev DB = sqlite. The ritual runs the
 new ActionDef flow end-to-end (task+why → verified ActionLog → tree growth).

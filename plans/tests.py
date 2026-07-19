@@ -382,3 +382,54 @@ class BehaviorTests(TestCase):
         missions = [c for c in today_actions(r, today=today, n=8) if c['type'] == 'growth_mission']
         self.assertTrue(missions)
         self.assertNotEqual(missions[0]['category'], 'movement')
+
+
+class LevelEngineTests(TestCase):
+    """Level Engine (bos/engines/04): mastery → promote/extend + the level-up event."""
+
+    def _seed(self, r, active=13):
+        from datetime import timedelta
+        from django.utils import timezone
+        from .models import UserProgram, ActionDef, ActionLog
+        walk = ActionDef.objects.get(slug='walk_steps')      # core habit
+        today = timezone.localdate()
+        program, _ = UserProgram.objects.get_or_create(response=r)
+        program.current_level = 1
+        program.level_started_on = today - timedelta(days=14)
+        program.extended_days = 0
+        program.save()
+        for i in range(active):
+            ActionLog.objects.create(response=r, action=walk, date=today - timedelta(days=i + 1),
+                                     status=ActionLog.CONFIRMED)
+        return program, today
+
+    def test_mastery_promotes(self):
+        from .progression import evaluate_level
+        r = make_response()
+        program, today = self._seed(r, active=13)          # ~87% consistency, core every day
+        ev = evaluate_level(program, today)
+        self.assertEqual(ev['decision'], 'promote')
+        program.refresh_from_db()
+        self.assertEqual(program.current_level, 2)
+
+    def test_insufficient_extends_never_resets(self):
+        from .progression import evaluate_level
+        r = make_response()
+        program, today = self._seed(r, active=2)           # far below the band
+        ev = evaluate_level(program, today)
+        self.assertEqual(ev['decision'], 'extend')
+        program.refresh_from_db()
+        self.assertEqual(program.current_level, 1)          # never lowered/reset
+        self.assertEqual(program.extended_days, 7)          # +7, keep going
+        self.assertNotIn('загуб', ev['message'].lower())    # never shaming
+
+    def test_ritual_surfaces_promotion_then_progress_celebrates_once(self):
+        c = Client()
+        r = make_response()
+        self._seed(r, active=13)
+        s = c.session; s['response_id'] = r.pk; s.save()
+        page = c.get(reverse('ritual'))                     # lazy re-eval promotes
+        self.assertIsNotNone(page.context['level_event'])
+        self.assertEqual(page.context['level_event']['decision'], 'promote')
+        self.assertEqual(c.get(reverse('progress')).context['celebrate_level'], 2)
+        self.assertIsNone(c.get(reverse('progress')).context['celebrate_level'])   # one-shot

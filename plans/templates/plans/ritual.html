@@ -60,6 +60,9 @@
 <body>
   <div class="wrap" id="mainWrap">
     {% include 'plans/_topnav.html' %}
+    <div id="levelBanner" class="fadein" style="display:{% if level_event %}flex{% else %}none{% endif %};align-items:center;justify-content:center;gap:.5rem;background:#EAF4EB;color:var(--green);border:1px solid #CDE8CF;border-radius:1rem;padding:.7rem 1rem;margin-bottom:1rem;font-weight:700;text-align:center;">
+      <span>🌳</span><span id="levelBannerText">{% if level_event %}{{ level_event.message }}{% endif %}</span>
+    </div>
     <div class="flex justify-center mb-4">
       <div class="sun">
         <svg class="w-12 h-12 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -168,9 +171,15 @@
     const flash=document.getElementById('flash');flash.classList.add('show');
     setTimeout(()=>{
       flash.classList.remove('show');updateProgress(data.progress);
+      if(data.level_event)showLevelEvent(data.level_event);
       if(data.choices&&data.choices.length){lead.textContent='Готово! Ето следващите стъпки:';render(data.choices);}
       else finish('Направи всичките си стъпки за днес!<br>Гордеем се с теб.');
     },1250);
+  }
+  function showLevelEvent(ev){
+    const b=document.getElementById('levelBanner');if(!b)return;
+    b.querySelector('#levelBannerText').textContent=ev.message||'';b.style.display='flex';
+    if(ev.decision==='promote')burst();   // celebrate a new level
   }
   function burst(){const cols=['#4CAF50','#FFB74D','#4A90A4','#A5D6A7','#FFE0B2'];for(let i=0;i<70;i++){const p=document.createElement('div');p.className='confetti';p.style.left=Math.random()*100+'vw';p.style.background=cols[i%cols.length];p.style.animationDuration=(2.4+Math.random()*1.8)+'s';p.style.animationDelay=(Math.random()*.6)+'s';document.body.appendChild(p);setTimeout(()=>p.remove(),4800);}}
   document.getElementById('stopBtn').addEventListener('click',()=>finish(PROGRESS.done_today?null:'Дори че си тук — това е стъпка.<br>До утре!'));

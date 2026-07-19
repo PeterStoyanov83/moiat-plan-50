@@ -105,6 +105,12 @@ Healthcheck fix (historical): `ALLOWED_HOSTS` always appends `.railway.app`; no 
 ---
 
 ## Latest (2026-07-19)
+- **Level Engine — mastery loop surfaced.** `views.ritual` now runs a **lazy nightly re-eval**
+  (`evaluate_level` on load, not only on completion) so promote/extend land even when idle.
+  Promote/extend messages surface as a **ritual banner** (server-rendered + shown from `step_done`
+  JSON `level_event`); a promotion sets `session['tree_celebrate']` → the **progress page shows a
+  "Ново ниво!" celebration** (Level *emits*, Tree *renders*). Extend copy stays non-shaming. No
+  schema change. Level → 🟢. 37/37 green. Remaining: a true cron; the explicit tree blossom (Tree engine).
 - **Behavior Engine — mission themes + weakest-habit adaptation** (`plans/behavior.py`, wired into
   `daily.today_actions`). `emphasized_categories(level)` = per-level curriculum (foundations first;
   nutrition/sleep @L4, social @L8, financial @L12). `category_stability()` scores each category from

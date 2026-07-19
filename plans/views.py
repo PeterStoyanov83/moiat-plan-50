@@ -94,7 +94,14 @@ def ritual(request):
     _, companion_message = pick_opening_step(response)
     from .daily import today_actions, welcome_back_message
     from .reflection import question_for, todays_reflection
-    choices = today_actions(response)
+    from .models import UserProgram
+    from .progression import evaluate_level
+    # Lazy nightly re-evaluation: mastery is checked on load too (not only on
+    # completion), so promote/extend land even for an idle returning user.
+    program, _ = UserProgram.objects.get_or_create(response=response)
+    ev = evaluate_level(program, timezone.localdate())
+    level_event = _level_event(ev, request)
+    choices = today_actions(response)   # uses the (possibly promoted) level
     # On return from a long gap, recovery framing leads (gentle, never shaming).
     companion_message = welcome_back_message(response) or companion_message
     plan = getattr(response, 'plan', None)
@@ -107,8 +114,19 @@ def ritual(request):
         'response_id': response.pk,
         'reflection_question': question_for(response),
         'reflection_done': todays_reflection(response) is not None,
+        'level_event': level_event,
     }
     return render(request, 'plans/ritual.html', context)
+
+
+def _level_event(ev, request):
+    """Shape a promote/extend evaluation into a UI event, and flag a promotion for
+    the Tree to celebrate on the progress page. Returns None for in_progress."""
+    if not ev or ev.get('decision') not in ('promote', 'extend'):
+        return None
+    if ev['decision'] == 'promote':
+        request.session['tree_celebrate'] = ev['level']
+    return {'decision': ev['decision'], 'level': ev['level'], 'message': ev.get('message', '')}
 
 
 @require_POST
@@ -138,6 +156,7 @@ def step_done(request):
     slug = request.POST.get('action', '').strip()
     text = request.POST.get('text', '').strip()
     category = request.POST.get('category', '').strip()
+    level_event = None
 
     if slug:
         # New ActionDef flow. The web shell has no sensors, so a tap is a
@@ -156,7 +175,7 @@ def step_done(request):
             mark_done(response, text or action.title, category or action.category)
             # System-driven level check (no-op until the level's window elapses).
             program, _ = UserProgram.objects.get_or_create(response=response)
-            evaluate_level(program, today)
+            level_event = _level_event(evaluate_level(program, today), request)
             distinct_id = str(request.user.pk) if request.user.is_authenticated else f'response-{response.pk}'
             apps.posthog_client.capture(
                 distinct_id=distinct_id,
@@ -169,7 +188,9 @@ def step_done(request):
                 },
             )
         from .daily import today_actions
-        return JsonResponse({'choices': today_actions(response), 'progress': today_progress(response)})
+        return JsonResponse({'choices': today_actions(response),
+                             'progress': today_progress(response),
+                             'level_event': level_event})
 
     # Legacy fallback (old knowledge-base flow / existing tests).
     if text:
@@ -216,6 +237,8 @@ def progress(request):
         'tree_level': tree['level'],
         'tree_health': tree['health'],
         'tree_dormant': 'true' if tree['dormant'] else 'false',
+        # One-shot: a fresh promotion tells the tree to celebrate (Level → Tree event).
+        'celebrate_level': request.session.pop('tree_celebrate', None),
     }
     return render(request, 'plans/progress.html', context)
 
