@@ -93,6 +93,7 @@ def ritual(request):
     # from the ActionDef library (core habits + missions), scaled to the level.
     _, companion_message = pick_opening_step(response)
     from .daily import today_actions, welcome_back_message
+    from .reflection import question_for, todays_reflection
     choices = today_actions(response)
     # On return from a long gap, recovery framing leads (gentle, never shaming).
     companion_message = welcome_back_message(response) or companion_message
@@ -104,8 +105,21 @@ def ritual(request):
         'progress': json.dumps(today_progress(response)),
         'plan_id': plan.pk if plan else None,
         'response_id': response.pk,
+        'reflection_question': question_for(response),
+        'reflection_done': todays_reflection(response) is not None,
     }
     return render(request, 'plans/ritual.html', context)
+
+
+@require_POST
+def reflect(request):
+    """Save the day's reflection answer (AI Planner §7). Idempotent per day."""
+    response = _session_response(request)
+    if response is None:
+        return JsonResponse({'error': 'no-session'}, status=400)
+    from .reflection import save_reflection
+    save_reflection(response, request.POST.get('answer', ''))
+    return JsonResponse({'ok': True})
 
 
 def _build_choices(response, first=None):

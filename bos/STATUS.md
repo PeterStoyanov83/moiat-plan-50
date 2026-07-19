@@ -13,7 +13,7 @@ Legend: ✅ done · 🟢 MVP-complete (minor/post-MVP open) · 🟡 partial · �
 | 4 Level | 🟡 | `progression.py`, `Level` | mastery score (40/30/20/10); band checks; promote/extend on completion | nightly re-eval; UI messages; level-up → tree event |
 | 5 Recovery | 🟢 | `tree_state.py`, `daily.py`, `UserProgram.recovery_until` | inactivity days; 7-day window opens at ≥14 idle; **recovery multiplier applied in daily.py (effort metrics only — sleep/hydration never reduced); linear taper 0.4→1.0; gentle non-shaming welcome-back copy** | nightly auto-open (currently opens on next tree read); recovery→tree "welcome back" visual |
 | 6 Tree | ✅ | `static/plans/tree-engine.js` (as-is), `tree_state.py`, `progress.html` | action-driven growth; level/health/dormant; visibility-gated zoom reveal; BG labels | route level-up/long-term events (branches/flowers/birds) explicitly |
-| 7 AI Planner | 🟡 | `ai_companion.py`, `daily.py`, `ritual.html` | rule-based 3 actions + why; AI warm line w/ fallback | `/api/today` full morning payload; weather/contraindications/stability; reflection question |
+| 7 AI Planner | 🟡 | `ai_companion.py`, `daily.py`, `reflection.py`, `ritual.html` | rule-based 3 actions + why; AI warm line w/ fallback; **reflection question (rule-based pool) + storage (`Reflection` model) + end-of-ritual UI + admin** | `/api/today` full morning payload; weather/stability; AI-written reflection |
 
 ## Cross-cutting / not yet built
 - **Mobile app + sensor bridge** (HealthKit / Google Fit / Health Connect / GPS / camera).
@@ -23,8 +23,8 @@ Legend: ✅ done · 🟢 MVP-complete (minor/post-MVP open) · 🟡 partial · �
 
 ## Data models (built) — `plans/models.py`
 `Level` · `ActionDef` · `UserProgram` · `ActionLog` · `HabitStability` · `TreeState` ·
-`DailyAssignment` (migrations `0007` schema, `0008` seed).
+`DailyAssignment` · `Reflection` (migrations `0007` schema, `0008` seed, `0011-0012` library, `0013` reflection).
 
 ## Verification of current build
-`python manage.py test plans` → 27/27 green. Local dev DB = sqlite. The ritual runs the
+`python manage.py test plans` → 31/31 green. Local dev DB = sqlite. The ritual runs the
 new ActionDef flow end-to-end (task+why → verified ActionLog → tree growth).

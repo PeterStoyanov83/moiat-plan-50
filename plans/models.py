@@ -288,3 +288,26 @@ class DailyAssignment(models.Model):
 
     def __str__(self):
         return f'{self.date} {self.slot}: {self.action_id}'
+
+
+class Reflection(models.Model):
+    """The day's reflection (AI Planner Engine §7): one gentle question + the
+    user's optional answer. Stored so the companion can learn over time. One per day."""
+    response = models.ForeignKey(
+        QuestionnaireResponse, on_delete=models.CASCADE, related_name='reflections'
+    )
+    date = models.DateField()
+    question = models.CharField(max_length=200)
+    answer = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Размисъл'
+        verbose_name_plural = 'Размисли'
+        unique_together = [('response', 'date')]
+        indexes = [models.Index(fields=['response', 'date'])]
+        ordering = ['-date']
+
+    def __str__(self):
+        return f'{self.date}: {self.answer[:40] or "(без отговор)"}'

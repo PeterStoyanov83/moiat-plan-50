@@ -8,6 +8,7 @@ urlpatterns = [
     path('ritual/', views.ritual, name='ritual'),
     path('ritual/done/', views.step_done, name='step_done'),
     path('ritual/swap/', views.step_swap, name='step_swap'),
+    path('ritual/reflect/', views.reflect, name='reflect'),
     path('progress/', views.progress, name='progress'),
     path('profile/', views.profile, name='profile'),
     path('result/<int:plan_id>/', views.result, name='result'),

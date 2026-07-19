@@ -105,6 +105,12 @@ Healthcheck fix (historical): `ALLOWED_HOSTS` always appends `.railway.app`; no 
 ---
 
 ## Latest (2026-07-19)
+- **AI Planner — daily reflection question shipped** (the precursor to any AI chat). New
+  `Reflection` model (`migrations/0013`, one per response/day, in admin) + `plans/reflection.py`
+  (rule-based question pool, stable per day). Shown on the ritual's end screen (`ritual.html`
+  final) with a textarea → `POST /ritual/reflect/` (`reflect` view). Answer stored for the future
+  AI-learning loop. Founder chose the **dedicated Reflection model**. Open: AI-written question;
+  surface reflections back to the companion. 31/31 green.
 - **Recovery Engine wired in.** `tree_state.recovery_factor()` — a linear taper 0.4→1.0 over the
   7-day recovery window. `daily.py` applies it to targets **only for effort metrics (steps/minutes)**
   — sleep hours and hydration glasses are never reduced (that's not recovery). `daily.welcome_back_message()`

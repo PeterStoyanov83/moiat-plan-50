@@ -302,3 +302,43 @@ class RecoveryTests(TestCase):
         self.assertTrue(msg)
         for shame in ('загуби', 'провал', 'изостана'):
             self.assertNotIn(shame, msg.lower())
+
+
+class ReflectionTests(TestCase):
+    """AI Planner Engine (bos/engines/07): the daily reflection question + storage."""
+
+    def test_question_is_stable_per_day(self):
+        from .reflection import question_for, QUESTIONS
+        r = make_response()
+        d = date(2026, 7, 19)
+        self.assertEqual(question_for(r, d), question_for(r, d))   # same on refresh
+        self.assertIn(question_for(r, d), QUESTIONS)
+
+    def test_save_is_idempotent_per_day(self):
+        from .reflection import save_reflection, todays_reflection
+        from .models import Reflection
+        r = make_response()
+        d = date(2026, 7, 19)
+        save_reflection(r, 'чувствам се добре', today=d)
+        save_reflection(r, 'всъщност чудесно', today=d)             # overwrite same day
+        self.assertEqual(Reflection.objects.filter(response=r, date=d).count(), 1)
+        self.assertEqual(todays_reflection(r, d).answer, 'всъщност чудесно')
+
+    def test_reflect_endpoint_stores_answer(self):
+        from .models import Reflection
+        c = Client()
+        r = make_response()
+        s = c.session; s['response_id'] = r.pk; s.save()
+        resp = c.post(reverse('reflect'), {'answer': 'хубав ден'})
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(Reflection.objects.filter(response=r, answer='хубав ден').exists())
+
+    def test_ritual_context_exposes_question_then_done(self):
+        c = Client()
+        r = make_response()
+        s = c.session; s['response_id'] = r.pk; s.save()
+        page = c.get(reverse('ritual'))
+        self.assertIn('reflection_question', page.context)
+        self.assertFalse(page.context['reflection_done'])
+        c.post(reverse('reflect'), {'answer': 'готово'})
+        self.assertTrue(c.get(reverse('ritual')).context['reflection_done'])

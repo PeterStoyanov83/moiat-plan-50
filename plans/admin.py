@@ -1,5 +1,14 @@
 from django.contrib import admin
-from .models import QuestionnaireResponse, UserPlan, Feedback, StepCompletion
+from .models import QuestionnaireResponse, UserPlan, Feedback, StepCompletion, Reflection
+
+
+@admin.register(Reflection)
+class ReflectionAdmin(admin.ModelAdmin):
+    list_display = ['id', 'response', 'date', 'question', 'answer']
+    list_filter = ['date']
+    search_fields = ['answer', 'question']
+    readonly_fields = ['created_at', 'updated_at']
+    ordering = ['-date']
 
 
 @admin.register(QuestionnaireResponse)
