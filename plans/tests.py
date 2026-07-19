@@ -376,6 +376,19 @@ class ReflectionTests(TestCase):
         entries = list(page.context['entries'])
         self.assertEqual([e.answer for e in entries], ['хубав ден'])
 
+    def test_oversized_input_is_bounded_not_500(self):
+        # The API can bypass the client maxlength — the server must still cap it.
+        from .models import Reflection
+        from .reflection import MAX_QUESTION, MAX_ANSWER
+        c = Client()
+        r = make_response()
+        s = c.session; s['response_id'] = r.pk; s.save()
+        resp = c.post(reverse('reflect'), {'answer': 'x' * 6000, 'question': 'q' * 500})
+        self.assertEqual(resp.status_code, 200)
+        obj = Reflection.objects.get(response=r)
+        self.assertLessEqual(len(obj.question), MAX_QUESTION)
+        self.assertLessEqual(len(obj.answer), MAX_ANSWER)
+
 
 class BehaviorTests(TestCase):
     """Behavior Engine (bos/engines/01): level themes + weakest-habit adaptation."""

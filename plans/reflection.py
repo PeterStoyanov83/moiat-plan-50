@@ -33,21 +33,31 @@ def todays_reflection(response, today=None):
     return Reflection.objects.filter(response=response, date=today).first()
 
 
+# Bounds (defense in depth). Answers are untrusted user text that also reaches the
+# LLM prompt, so cap what we store and what we feed the model.
+MAX_ANSWER = 2000       # stored answer length
+MAX_QUESTION = 200      # matches Reflection.question CharField; avoids a DB overflow 500
+PROMPT_ANSWER_CAP = 280  # per-answer cap when feeding the AI (limits prompt-injection surface)
+
+
 def recent_answers(response, limit=3, today=None):
     """The user's last few non-empty reflection answers (excluding today) — context
-    the AI companion can learn from. Most recent first."""
+    the AI companion can learn from. Most recent first. Each is truncated so a long
+    answer can't bloat or dominate the prompt."""
     today = today or timezone.localdate()
     qs = (Reflection.objects.filter(response=response)
           .exclude(answer='').exclude(date=today).order_by('-date')[:limit])
-    return [r.answer for r in qs]
+    return [r.answer[:PROMPT_ANSWER_CAP] for r in qs]
 
 
 def save_reflection(response, answer, today=None, question=None):
-    """Store (or update) today's reflection answer. Idempotent per day."""
+    """Store (or update) today's reflection answer. Idempotent per day. Untrusted
+    input is length-bounded (client caps can be bypassed via the API)."""
     today = today or timezone.localdate()
-    question = question or question_for(response, today)
+    question = (question or question_for(response, today))[:MAX_QUESTION]
+    answer = (answer or '').strip()[:MAX_ANSWER]
     obj, _ = Reflection.objects.update_or_create(
         response=response, date=today,
-        defaults={'question': question, 'answer': (answer or '').strip()},
+        defaults={'question': question, 'answer': answer},
     )
     return obj

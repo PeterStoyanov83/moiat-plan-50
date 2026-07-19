@@ -298,12 +298,17 @@ def reflections(request):
     response = _session_response(request)
     if response is None:
         return redirect('questionnaire')
+    from .reflection import question_for, todays_reflection
     entries = (response.reflections.exclude(answer='').order_by('-date'))
     plan = getattr(response, 'plan', None)
     return render(request, 'plans/reflections.html', {
         'greeting_name': response.first_name or '',
         'entries': entries,
         'plan_id': plan.pk if plan else None,
+        # Today's composer — reflect straight from the journal (rule-based question,
+        # so the page loads without an AI call).
+        'reflection_question': question_for(response),
+        'reflected_today': todays_reflection(response) is not None,
     })
 
 

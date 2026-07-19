@@ -105,6 +105,15 @@ Healthcheck fix (historical): `ALLOWED_HOSTS` always appends `.railway.app`; no 
 ---
 
 ## Latest (2026-07-19)
+- **Reflect-from-journal + AI-endpoint hardening.** `/reflections/` now has a **today's composer**
+  at the top (reflect straight from the „Размисли" tab, reusing the `reflect` endpoint), above the
+  past entries. **Security:** reflection input is length-bounded server-side (`MAX_ANSWER=2000`,
+  `MAX_QUESTION=200` — fixes a real >200-char `question` → DB-500 bug; API can bypass client caps)
+  and each answer fed to the LLM is truncated (`PROMPT_ANSWER_CAP=280`) to limit prompt-injection
+  surface. Full **AI-endpoint security requirements** written into `bos/engines/07-ai-planner-engine.md`
+  (auth/isolation, input bounds, rate/cost limits, injection resistance, output escaping, scope) —
+  binding for the future chat. **Known gap:** the companion call runs on every ritual load; add a
+  per-day cache / rate limit before shipping a chat. 46/46 green.
 - **Reflection UI redesigned + a journal to revisit.** The end-of-ritual reflection is now a calm,
   intentional moment (gentle divider, softer larger input, readable placeholder, delayed fade-in so
   the celebration lands first, non-shaming thanks). New **`/reflections/` journal** (`views.reflections`,

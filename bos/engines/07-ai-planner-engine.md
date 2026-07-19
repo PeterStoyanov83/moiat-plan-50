@@ -39,3 +39,27 @@ history · wearables · completion history · recovery state · habit stability 
   explanation + reflection question).
 - Feed weather/season + `contraindications` + `HabitStability` into selection.
 - Persist the reflection answer (storage decision) for the AI to learn from.
+
+## Security (binding for any endpoint that sends user text to the LLM)
+
+User text that reaches the model is **untrusted input**. Every AI-facing endpoint (the
+reflection learning loop today; a chat tomorrow) MUST:
+
+1. **Auth + isolation** — session/authenticated; a user reaches only their own data. The
+   prompt NEVER contains another user's data, secrets, API keys, or internal ids.
+2. **Input bounds** — cap message length and how many prior messages/answers are fed
+   (server-side; client caps are bypassable via the API). *Done for reflect:*
+   `MAX_ANSWER`/`MAX_QUESTION` on store + `PROMPT_ANSWER_CAP` on what's fed to the prompt.
+3. **Rate limiting + cost caps** — per-user rate + daily cap (Claude calls cost money →
+   spam = DoS/cost attack); `max_tokens` cap, timeout, Haiku tier, cache per day where
+   possible. *Gap:* the companion call currently runs on every ritual load — add a per-day
+   cache / rate limit before a chat ships.
+4. **Prompt-injection resistance** — user content is clearly delimited and labelled
+   untrusted; the system prompt ignores instructions embedded in it; the model has **no
+   tools, no DB, no actions** — it only returns text. Output is schema/format-constrained.
+5. **Output is escaped** — render model output as text, never raw HTML (XSS). Django
+   auto-escaping stays on; no `|safe` on model output.
+6. **Scope + safety** — stays in general-wellbeing tone, not medical advice; gentle refusal
+   for harmful/off-scope requests; graceful fallback on any failure (never break the ritual).
+7. **CSRF (web) / token auth (mobile)**; POST only. Health-category text → same GDPR
+   handling; never forward user text to analytics.

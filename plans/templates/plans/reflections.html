@@ -19,6 +19,15 @@
   .entry .q{font-size:1rem;color:var(--muted);font-style:italic;margin:.35rem 0 .5rem;text-wrap:pretty}
   .entry .a{font-size:1.22rem;line-height:1.55;color:var(--ink);text-wrap:pretty}
   .quote{color:#D9C7A0;font-size:1.6rem;line-height:0;vertical-align:-0.35rem;margin-right:.15rem}
+  /* Today's composer — reflect right here */
+  .composer{background:var(--cream-soft);border:1px solid #F2EADB;border-radius:1.4rem;padding:1.5rem;margin-bottom:2rem;box-shadow:0 8px 26px rgba(34,48,42,.05)}
+  .composer .c-q{font-size:1.12rem;font-weight:700;color:var(--ink);line-height:1.5;margin:0 0 .9rem;text-wrap:pretty}
+  .composer textarea{width:100%;font-family:inherit;font-size:1.08rem;line-height:1.5;border:1.5px solid #E7DECC;border-radius:1rem;padding:.85rem 1rem;background:#fff;color:var(--ink);resize:none;box-sizing:border-box}
+  .composer textarea::placeholder{color:#6E6355}
+  .composer textarea:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 .2rem rgba(46,125,50,.12)}
+  .c-save{margin-top:.85rem;background:var(--green);color:#fff;border:none;border-radius:50px;padding:.75rem 2.2rem;font-weight:800;font-size:1.02rem;cursor:pointer;box-shadow:0 8px 22px rgba(46,125,50,.18)}
+  .c-save:disabled{opacity:.6}
+  .c-thanks{color:var(--green);font-weight:800;margin:.85rem 0 0}
   .rise{animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
   @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
   .leaf-empty{width:4.5rem;height:4.5rem;margin:0 auto 1.25rem;border-radius:50%;display:flex;align-items:center;justify-content:center;
@@ -35,6 +44,16 @@
     {% include 'plans/_topnav.html' %}
     <h1 class="text-3xl font-extrabold mb-1 rise">Твоите размисли</h1>
     <p class="lede mb-6 rise">Малки мисли от твоите дни. Тук остават, за да се връщаш към тях{% if greeting_name %}, {{ greeting_name }}{% endif %}.</p>
+
+    {% if not reflected_today %}
+    <section class="composer rise">
+      <p class="c-q">{{ reflection_question }}</p>
+      <textarea id="cInput" rows="3" maxlength="2000" placeholder="Няколко думи, ако искаш…"></textarea>
+      <input type="hidden" id="cQuestion" value="{{ reflection_question }}">
+      <button id="cSave" class="c-save">Запази</button>
+      <p id="cThanks" class="c-thanks" style="display:none;">🌱 Благодаря, че сподели.</p>
+    </section>
+    {% endif %}
 
     {% for e in entries %}
     <article class="entry rise" style="animation-delay:{{ forloop.counter0 }}0ms">
@@ -57,5 +76,23 @@
   </div>
 
   {% include 'plans/_bottomnav.html' %}
+
+  <script>
+    (function(){
+      const btn=document.getElementById('cSave');if(!btn)return;
+      const CSRF='{{ csrf_token }}', URL="{% url 'reflect' %}";
+      btn.addEventListener('click',async()=>{
+        btn.disabled=true;
+        const answer=document.getElementById('cInput').value;
+        const question=document.getElementById('cQuestion').value;
+        try{
+          await fetch(URL,{method:'POST',headers:{'X-CSRFToken':CSRF,'Content-Type':'application/x-www-form-urlencoded'},
+            body:new URLSearchParams({answer,question})});
+        }catch(e){}
+        document.getElementById('cThanks').style.display='block';
+        setTimeout(()=>location.reload(),1100);   // show the new entry, hide composer
+      });
+    })();
+  </script>
 </body>
 </html>
