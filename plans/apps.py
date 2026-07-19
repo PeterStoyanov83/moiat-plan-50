@@ -27,3 +27,45 @@ class PlansConfig(AppConfig):
                 disabled=not api_key,
             )
             atexit.register(posthog_client.shutdown)
+            self._connect_allauth_signals()
+
+    @staticmethod
+    def _connect_allauth_signals():
+        from django.dispatch import receiver
+        from allauth.account.signals import user_signed_up, user_logged_in
+
+        @receiver(user_signed_up)
+        def on_user_signed_up(request, user, **kwargs):
+            distinct_id = str(user.pk)
+            posthog_client.set(
+                distinct_id=distinct_id,
+                properties={
+                    'has_google': user.socialaccount_set.filter(provider='google').exists(),
+                    'has_password': user.has_usable_password(),
+                },
+            )
+            posthog_client.capture(
+                distinct_id=distinct_id,
+                event='user_signed_up',
+                properties={
+                    'signup_method': 'google' if not user.has_usable_password() else 'email',
+                },
+            )
+
+        @receiver(user_logged_in)
+        def on_user_logged_in(request, user, **kwargs):
+            distinct_id = str(user.pk)
+            posthog_client.set(
+                distinct_id=distinct_id,
+                properties={
+                    'has_google': user.socialaccount_set.filter(provider='google').exists(),
+                    'has_password': user.has_usable_password(),
+                },
+            )
+            posthog_client.capture(
+                distinct_id=distinct_id,
+                event='user_logged_in',
+                properties={
+                    'login_method': 'google' if not user.has_usable_password() else 'email',
+                },
+            )
