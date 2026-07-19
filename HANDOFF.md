@@ -105,6 +105,13 @@ Healthcheck fix (historical): `ALLOWED_HOSTS` always appends `.railway.app`; no 
 ---
 
 ## Latest (2026-07-19)
+- **Verification — server `/api/verify/` endpoint built** (`views.verify_action`, `POST api/verify/`).
+  A client posts one action's evidence (`measured`/`claimed`, `minutes`, `confidence`, or `confirmed`);
+  `verification.verify()` resolves it (sensor/timer/location/photo/confirm) with gentle anti-cheat
+  (`claimed > 3× measured` → not counted, non-shaming message). On a counting outcome it bridges to
+  streak/tree (`mark_done`) + runs the level check (`level_event`). The browser has no sensors, so
+  `step_done` stays the web path; this endpoint is for the future mobile client + is covered by tests.
+  Verification → 🟢 (server side). Remaining (Track B): wearable/HealthKit/Fit/GPS adapters + the app. 44/44 green.
 - **AI Planner — reflection now AI-written + a learning loop.** The companion's single Claude call
   (`ai_companion._ai_choose`) now returns `{index, message, reflection}` — the warm line **and** the
   end-of-day reflection question, both informed by the user's **recent reflection answers**

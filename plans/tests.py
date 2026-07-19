@@ -454,3 +454,55 @@ class LevelEngineTests(TestCase):
         self.assertEqual(page.context['level_event']['decision'], 'promote')
         self.assertEqual(c.get(reverse('progress')).context['celebrate_level'], 2)
         self.assertIsNone(c.get(reverse('progress')).context['celebrate_level'])   # one-shot
+
+
+class VerificationEngineTests(TestCase):
+    """Verification Engine (bos/engines/03): the objective /api/verify endpoint."""
+
+    def _session(self):
+        c = Client()
+        r = make_response()
+        s = c.session; s['response_id'] = r.pk; s.save()
+        return c, r
+
+    def _verify(self, c, **data):
+        return c.post(reverse('verify_action'), data).json()
+
+    def test_sensor_meeting_target_verifies(self):
+        from .models import ActionLog
+        c, _ = self._session()
+        data = self._verify(c, action='walk_steps', measured=2500)   # L1 target 2000
+        self.assertEqual(data['status'], ActionLog.VERIFIED)
+        self.assertTrue(data['counts_as_done'])
+
+    def test_sensor_under_target_does_not_count(self):
+        from .models import ActionLog
+        c, _ = self._session()
+        data = self._verify(c, action='walk_steps', measured=500)
+        self.assertEqual(data['status'], ActionLog.UNVERIFIED)
+        self.assertFalse(data['counts_as_done'])
+
+    def test_anticheat_rejects_implausible_claim_gently(self):
+        from .models import ActionLog
+        from .verification import GENTLE_UNVERIFIED
+        c, _ = self._session()
+        data = self._verify(c, action='walk_steps', measured=200, claimed=10000)
+        self.assertEqual(data['status'], ActionLog.UNVERIFIED)
+        self.assertFalse(data['counts_as_done'])
+        self.assertEqual(data['message'], GENTLE_UNVERIFIED)    # gentle, never shaming
+
+    def test_photo_confidence_threshold(self):
+        from .models import ActionLog
+        c1, _ = self._session()
+        self.assertEqual(self._verify(c1, action='nutrition_meal', confidence=0.8)['status'],
+                         ActionLog.VERIFIED)
+        c2, _ = self._session()
+        self.assertEqual(self._verify(c2, action='nutrition_meal', confidence=0.3)['status'],
+                         ActionLog.UNVERIFIED)
+
+    def test_manual_confirm_always_counts(self):
+        from .models import ActionLog
+        c, _ = self._session()
+        data = self._verify(c, action='hydration', confirmed='1')
+        self.assertEqual(data['status'], ActionLog.CONFIRMED)
+        self.assertTrue(data['counts_as_done'])

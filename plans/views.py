@@ -200,6 +200,55 @@ def step_done(request):
 
 
 @require_POST
+def verify_action(request):
+    """Objective verification endpoint (Verification Engine §3). A client posts the
+    measured evidence for one action — device aggregate (`measured`/`claimed`), timer
+    or GPS `minutes`, or photo AI `confidence` — and we resolve it to verified/unverified
+    via `verification.verify`, with gentle anti-cheat. The browser has no sensors, so this
+    is exercised by the (future) mobile client and tests; `step_done` remains the web path.
+    """
+    response = _session_response(request)
+    if response is None:
+        return JsonResponse({'error': 'no-session'}, status=400)
+    from .models import ActionDef, ActionLog, UserProgram
+    from .verification import log_attempt, GENTLE_UNVERIFIED
+    from .progression import evaluate_level
+
+    action = ActionDef.objects.filter(slug=request.POST.get('action', '').strip()).first()
+    if not action:
+        return JsonResponse({'error': 'unknown-action'}, status=400)
+
+    def _num(key):
+        v = request.POST.get(key)
+        try:
+            return float(v) if v not in (None, '') else None
+        except ValueError:
+            return None
+
+    program, _ = UserProgram.objects.get_or_create(response=response)
+    today = timezone.localdate()
+    log = log_attempt(
+        response, action, today, level=program.current_level,
+        measured=_num('measured'), claimed=_num('claimed'), minutes=_num('minutes'),
+        confidence=_num('confidence'),
+        confirmed=request.POST.get('confirmed') in ('1', 'true', 'True'),
+    )
+    counts = log.status in ActionLog.COUNTS_AS_DONE
+    level_event = None
+    if counts:
+        # Keep streak/tree consistent and run the system-driven level check.
+        mark_done(response, action.title, action.category)
+        level_event = _level_event(evaluate_level(program, today), request)
+    return JsonResponse({
+        'status': log.status,
+        'counts_as_done': counts,
+        'message': '' if counts else GENTLE_UNVERIFIED,   # never shame
+        'level_event': level_event,
+        'progress': today_progress(response),
+    })
+
+
+@require_POST
 def step_swap(request):
     response = _session_response(request)
     if response is None:
