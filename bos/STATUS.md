@@ -12,7 +12,7 @@ Legend: ✅ done · 🟢 MVP-complete (minor/post-MVP open) · 🟡 partial · �
 | 3 Verification | 🟡 | `verification.py`, `models.py::ActionLog` | 5 verifier types + anti-cheat; web = trust-based confirm | `/api/verify/sensor` + `/api/verify/photo`; wearable/HealthKit/Fit/GPS adapters |
 | 4 Level | 🟢 | `progression.py`, `views.py`, `Level` | mastery (40/30/20/10); band checks; promote/extend; **lazy nightly re-eval on ritual load; promote/extend messages surfaced (ritual banner + `step_done` JSON); level-up signal → progress celebration** | true scheduled cron (currently lazy on load); explicit tree blossom animation (→ Tree Engine) |
 | 5 Recovery | 🟢 | `tree_state.py`, `daily.py`, `UserProgram.recovery_until` | inactivity days; 7-day window opens at ≥14 idle; **recovery multiplier applied in daily.py (effort metrics only — sleep/hydration never reduced); linear taper 0.4→1.0; gentle non-shaming welcome-back copy** | nightly auto-open (currently opens on next tree read); recovery→tree "welcome back" visual |
-| 6 Tree | ✅ | `static/plans/tree-engine.js` (as-is), `tree_state.py`, `progress.html` | action-driven growth; level/health/dormant; visibility-gated zoom reveal; BG labels | route level-up/long-term events (branches/flowers/birds) explicitly |
+| 6 Tree | ✅ | `static/plans/tree-engine.js` (as-is), `tree_state.py`, `progress.html` | action-driven growth; level/health/dormant; zoom reveal; BG labels; **level-up animates the trunk/branches (mount prev level → `setLevel` to new, watched on the progress page)** | long-term events (birds/fruit/seasonal); recovery-renewal visual on return |
 | 7 AI Planner | 🟡 | `ai_companion.py`, `daily.py`, `reflection.py`, `ritual.html` | rule-based 3 actions + why; AI warm line w/ fallback; **reflection question (rule-based pool) + storage (`Reflection` model) + end-of-ritual UI + admin** | `/api/today` full morning payload; weather/stability; AI-written reflection |
 
 ## Cross-cutting / not yet built
@@ -26,8 +26,8 @@ Legend: ✅ done · 🟢 MVP-complete (minor/post-MVP open) · 🟡 partial · �
 **Track A — Web MVP (no mobile needed), do these first:**
 1. ✅ **Level (4)** — lazy re-eval on load + promote/extend messages (ritual banner + step_done JSON)
    + level-up signal → progress celebration. _Remaining for full: a true scheduled cron._
-2. **Tree (6) → 100%:** consume the level-up signal → visible reaction (new branch/flower/bird);
-   route long-term milestones explicitly. ← *next*
+2. ✅ **Tree (6)** — level-up now animates the trunk/branches (`setLevel` prev→new on the progress
+   page). _Remaining: long-term events (birds/fruit/seasonal); recovery-renewal visual._
 3. **Recovery (5) → 100%:** nightly auto-open of the recovery window (don't wait for a tree read);
    recovery → tree "welcome back" visual.
 4. **AI Planner (7) → 100% (web parts):** AI-written reflection question (fallback to the rule pool);

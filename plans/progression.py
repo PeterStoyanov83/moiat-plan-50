@@ -89,7 +89,7 @@ def evaluate_level(program, today=None):
         program.save(update_fields=['current_level', 'level_started_on', 'extended_days'])
         return {'decision': 'promote', 'scores': scores, 'mastery': mastery,
                 'level': program.current_level,
-                'message': 'Ново ниво! Дървото ти пуска нов клон.'}
+                'message': 'Дървото ти пуска нов клон. 🌱'}
 
     if passed:  # already at 20 — sustained mastery, stay
         return {'decision': 'in_progress', 'scores': scores, 'mastery': mastery,

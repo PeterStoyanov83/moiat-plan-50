@@ -105,6 +105,14 @@ Healthcheck fix (historical): `ALLOWED_HOSTS` always appends `.railway.app`; no 
 ---
 
 ## Latest (2026-07-19)
+- **Tree Engine — level-up now animates.** `progress.html` consumes the Level engine's
+  `celebrate_level` signal: it mounts the tree one level below and calls `tree.setLevel(new, {animate})`
+  after the page settles, so the user **watches the trunk/branches grow** into the new level (major
+  growth event, spec §6). Non-celebration loads are unchanged. Vendored engine still used as-is.
+  Remaining: long-term events (birds/fruit) + a recovery-renewal visual on return.
+- **Product principle (founder, 2026-07-19): never show level numbers / the word „ниво" to users.**
+  Levels 1–20 stay internal mechanics; progression is expressed only through the tree metaphor +
+  its Bulgarian growth-stage labels. Level-up copy is now „Дървото ти пуска нов клон." (no number).
 - **Level Engine — mastery loop surfaced.** `views.ritual` now runs a **lazy nightly re-eval**
   (`evaluate_level` on load, not only on completion) so promote/extend land even when idle.
   Promote/extend messages surface as a **ritual banner** (server-rendered + shown from `step_done`

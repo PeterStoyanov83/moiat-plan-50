@@ -25,7 +25,7 @@
     {% include 'plans/_topnav.html' %}
     {% if celebrate_level %}
     <div class="fadein" style="background:#EAF4EB;color:var(--green);border:1px solid #CDE8CF;border-radius:1rem;padding:.85rem 1rem;margin-bottom:1rem;font-weight:800;text-align:center;">
-      🎉 Ново ниво {{ celebrate_level }}! Дървото ти порасна.
+      🌳 Дървото ти порасна — покарва нов клон!
     </div>
     {% endif %}
     <h1 class="text-3xl font-extrabold mb-1 fadein">Твоето дърво</h1>
@@ -74,6 +74,11 @@
   const seed = "{{ tree_seed|escapejs }}";
   const stageLabel = (n) => { try { return (growthStage(n) || {}).label || ''; } catch (e) { return ''; } };
 
+  // Level Engine emitted a promotion → animate the trunk/branches growing to the new
+  // level so the user *watches* it happen (mount one level below, then setLevel up).
+  const CELEBRATE = {{ celebrate_level|default:"null" }};
+  const mountLevel = Math.max(1, CELEBRATE ? CELEBRATE - 1 : {{ tree_level|default:1 }});
+
   // Remember how many steps the tree had the last time THIS user looked at it,
   // so a step completed since then zooms in on its new leaf — the engine's
   // cinematic reveal auto-plays once the canvas is really on screen (this page).
@@ -87,7 +92,7 @@
       completedActions: lastSeen,
       season: "{{ tree_season }}",
       personality: "calm",
-      level: {{ tree_level|default:1 }},   // system-driven (never user-picked)
+      level: mountLevel,   // system-driven (never user-picked)
     });
     // Gentle inactivity state — wood & roots never regress.
     tree.setHealth({{ tree_health|default:100 }});
@@ -113,6 +118,14 @@
       else window.addEventListener('load', queue, { once: true });
     } else {
       localStorage.setItem(key, String(total)); // nothing new to reveal; keep in sync
+    }
+
+    // Level-up: grow the trunk/branches to the new level (major growth event, spec §6).
+    if (CELEBRATE) {
+      const grow = () => setTimeout(() => { try { tree.setLevel(CELEBRATE, { animate: true }); } catch (e) {} }, 900);
+      if (document.readyState === 'complete') grow();
+      else window.addEventListener('load', grow, { once: true });
+      if (st) st.textContent = stageLabel(total);
     }
   } catch (e) { console.warn('tree failed', e); }
 </script>
