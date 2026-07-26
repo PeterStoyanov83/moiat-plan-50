@@ -29,6 +29,14 @@
     font-weight:800;display:flex;align-items:center;justify-content:center}
   .ico{width:3.2rem;height:3.2rem;flex:none;border-radius:1rem;display:flex;align-items:center;justify-content:center}
   .btn-swap{background:transparent;color:var(--muted);font-size:1.05rem;padding:.85rem;font-weight:700;border:none;cursor:pointer;width:100%}
+  .bubbles{display:flex;flex-wrap:wrap;justify-content:center;gap:1rem .9rem;margin:.25rem 0 1.75rem}
+  .bubble{border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:.45rem;width:4.3rem;padding:0}
+  .bubble .circle{width:3.7rem;height:3.7rem;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--cream-soft);border:1.5px solid #EEE3CE;box-shadow:0 4px 14px rgba(34,48,42,.06);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease,background .2s ease}
+  .bubble .circle svg{width:1.7rem;height:1.7rem}
+  .bubble:hover .circle{transform:translateY(-2px);box-shadow:0 10px 22px rgba(34,48,42,.10)}
+  .bubble.active .circle{border-color:var(--green);background:#EAF4EB;box-shadow:0 8px 20px rgba(46,125,50,.20)}
+  .bubble .lbl{font-size:.8rem;font-weight:700;color:var(--muted);line-height:1.1;text-align:center}
+  .bubble.active .lbl{color:var(--green)}
   #reflectInput::placeholder{color:#6E6355}
   #reflectInput:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 .2rem rgba(46,125,50,.12)}
   #flash{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(251,247,238,.92);backdrop-filter:blur(3px);z-index:40;text-align:center}
@@ -74,8 +82,9 @@
       </div>
     </div>
     <p class="fadein d1 text-center text-xl text-[color:var(--muted)] mb-1">Добро утро{% if greeting_name %}, {{ greeting_name }}{% endif %}.</p>
-    <p id="lead" class="fadein d2 text-center text-2xl font-extrabold mb-5">{{ companion_message|default:"Избери своята стъпка за днес:" }}</p>
+    <p id="lead" class="fadein d2 text-center text-2xl font-extrabold mb-5">В коя област днес?</p>
 
+    <div id="bubbles" class="bubbles fadein d2"></div>
     <div id="choices" class="space-y-3"></div>
 
     <div class="mt-auto pt-8 text-center">
@@ -129,8 +138,8 @@
   {% include 'plans/_bottomnav.html' %}
 
 <script>
-  const CSRF='{{ csrf_token }}', DONE_URL="{% url 'step_done' %}", REFLECT_URL="{% url 'reflect' %}";
-  const INITIAL={{ initial_choices|safe }};
+  const CSRF='{{ csrf_token }}', DONE_URL="{% url 'step_done' %}", REFLECT_URL="{% url 'reflect' %}", CHOICES_URL="{% url 'ritual_choices' %}";
+  const CATEGORIES={{ categories|safe }};
   let PROGRESS={{ progress|safe }};
   const LETTERS=['А','Б','В'];
   const ICON={
@@ -160,6 +169,27 @@
     });
   }
   async function post(url,body){const r=await fetch(url,{method:'POST',headers:{'X-CSRFToken':CSRF,'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(body)});return r.json();}
+  // Category bubbles — the user picks an area, then sees only that area's steps.
+  const bubbles=document.getElementById('bubbles');
+  function renderBubbles(){
+    CATEGORIES.forEach(c=>{
+      const m=META[c.icon]||META.walk;
+      const b=document.createElement('button');
+      b.className='bubble';
+      b.innerHTML=`<span class="circle" style="color:${m[1]}">${ICON[c.icon]||ICON.walk}</span><span class="lbl">${c.label}</span>`;
+      b.onclick=()=>selectCategory(c,b);
+      bubbles.appendChild(b);
+    });
+  }
+  async function selectCategory(c,btn){
+    document.querySelectorAll('.bubble').forEach(x=>x.classList.remove('active'));
+    btn.classList.add('active');
+    lead.textContent='Избери своята стъпка:';
+    box.innerHTML='';
+    const data=await post(CHOICES_URL,{category:c.slug});
+    if(data.choices&&data.choices.length){render(data.choices);}
+    else{lead.textContent=`Готово в „${c.label}“ за днес 🌱 Избери друга област.`;}
+  }
   function finish(msg){document.getElementById('mainWrap').style.display='none';const f=document.getElementById('final');f.classList.add('show');if(msg)document.getElementById('finalMsg').innerHTML=msg;burst();showReflection();}
   function showReflection(){
     const rb=document.getElementById('reflectBlock');if(!rb)return;
@@ -185,8 +215,8 @@
     setTimeout(()=>{
       flash.classList.remove('show');updateProgress(data.progress);
       if(data.level_event)showLevelEvent(data.level_event);
-      if(data.choices&&data.choices.length){lead.textContent='Готово! Ето следващите стъпки:';render(data.choices);}
-      else finish('Направи всичките си стъпки за днес!<br>Гордеем се с теб.');
+      if(data.choices&&data.choices.length){lead.textContent='Още в тази област:';render(data.choices);}
+      else{box.innerHTML='';lead.textContent='Браво! Готово в тази област 🌱 Избери друга или приключи.';}
     },1250);
   }
   function showLevelEvent(ev){
@@ -197,7 +227,7 @@
   function burst(){const cols=['#4CAF50','#FFB74D','#4A90A4','#A5D6A7','#FFE0B2'];for(let i=0;i<70;i++){const p=document.createElement('div');p.className='confetti';p.style.left=Math.random()*100+'vw';p.style.background=cols[i%cols.length];p.style.animationDuration=(2.4+Math.random()*1.8)+'s';p.style.animationDelay=(Math.random()*.6)+'s';document.body.appendChild(p);setTimeout(()=>p.remove(),4800);}}
   document.getElementById('stopBtn').addEventListener('click',()=>finish(PROGRESS.done_today?null:'Дори че си тук — това е стъпка.<br>До утре!'));
   updateProgress(PROGRESS);
-  if(INITIAL&&INITIAL.length)render(INITIAL); else finish(PROGRESS.done_today?'Направи всичките си стъпки за днес!<br>Гордеем се с теб.':null);
+  renderBubbles();   // start on the area chooser; steps load once an area is picked
 </script>
 </body>
 </html>

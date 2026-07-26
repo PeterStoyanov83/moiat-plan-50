@@ -531,3 +531,30 @@ class VerificationEngineTests(TestCase):
         data = self._verify(c, action='hydration', confirmed='1')
         self.assertEqual(data['status'], ActionLog.CONFIRMED)
         self.assertTrue(data['counts_as_done'])
+
+
+class CategorySelectionTests(TestCase):
+    """Home-screen category bubbles → the user picks an area, sees only its actions."""
+
+    def test_categories_meta_lists_present_areas_with_label_and_icon(self):
+        from .daily import categories_meta
+        cats = categories_meta()
+        slugs = {c['slug'] for c in cats}
+        self.assertIn('movement', slugs)
+        self.assertIn('nutrition', slugs)
+        for c in cats:
+            self.assertTrue(c['label'] and c['icon'])
+
+    def test_today_actions_filters_to_one_category(self):
+        from .daily import today_actions
+        r = make_response()
+        cats = {a['category'] for a in today_actions(r, category='movement', n=8)}
+        self.assertEqual(cats, {'movement'})
+
+    def test_ritual_choices_endpoint_returns_only_that_area(self):
+        c = Client()
+        r = make_response()
+        s = c.session; s['response_id'] = r.pk; s.save()
+        data = c.post(reverse('ritual_choices'), {'category': 'social'}).json()
+        self.assertTrue(data['choices'])
+        self.assertTrue(all(a['category'] == 'social' for a in data['choices']))

@@ -104,6 +104,16 @@ Healthcheck fix (historical): `ALLOWED_HOSTS` always appends `.railway.app`; no 
 
 ---
 
+## Latest (2026-07-26)
+- **Ritual home = category bubbles.** The ritual now opens on **circular category bubbles**
+  (Движение · Хранене · Вода · Сън · Близост · Спокойствие · Финанси) instead of an auto-served
+  mixed A/Б/В. The user taps an area → `POST /ritual/choices/` (`ritual_choices` view) →
+  `daily.today_actions(category=…)` serves only that area's steps; `step_done` keeps the next
+  steps in the same area. `daily.categories_meta()` powers the bubbles (icons/colours reused from
+  the ritual's ICON/META). Selection rules (core-first, weakest-habit bias, safety gating) now run
+  *within* the chosen area. Behavioral note: the "≥3/day includes core habits" guarantee is now
+  user-gated. 49/49 green.
+
 ## Latest (2026-07-19)
 - **Reflect-from-journal + AI-endpoint hardening.** `/reflections/` now has a **today's composer**
   at the top (reflect straight from the „Размисли" tab, reusing the `reflect` endpoint), above the

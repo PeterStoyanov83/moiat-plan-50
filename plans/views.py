@@ -92,7 +92,7 @@ def ritual(request):
     # AI companion writes a warm opening line (when enabled). Actions now come
     # from the ActionDef library (core habits + missions), scaled to the level.
     _, companion_message, ai_reflection = pick_opening_step(response)
-    from .daily import today_actions, welcome_back_message
+    from .daily import welcome_back_message, categories_meta
     from .reflection import question_for, todays_reflection
     from .models import UserProgram
     from .progression import evaluate_level
@@ -101,13 +101,13 @@ def ritual(request):
     program, _ = UserProgram.objects.get_or_create(response=response)
     ev = evaluate_level(program, timezone.localdate())
     level_event = _level_event(ev, request)
-    choices = today_actions(response)   # uses the (possibly promoted) level
+    # The user first picks an area (category bubbles); actions load for that area.
     # On return from a long gap, recovery framing leads (gentle, never shaming).
     companion_message = welcome_back_message(response) or companion_message
     plan = getattr(response, 'plan', None)
     context = {
         'greeting_name': response.first_name or '',
-        'initial_choices': json.dumps(choices, ensure_ascii=False),
+        'categories': json.dumps(categories_meta(), ensure_ascii=False),
         'companion_message': companion_message or '',
         'progress': json.dumps(today_progress(response)),
         'plan_id': plan.pk if plan else None,
@@ -117,6 +117,17 @@ def ritual(request):
         'level_event': level_event,
     }
     return render(request, 'plans/ritual.html', context)
+
+
+@require_POST
+def ritual_choices(request):
+    """Actions for the area the user picked on the home screen (category bubble)."""
+    response = _session_response(request)
+    if response is None:
+        return JsonResponse({'error': 'no-session'}, status=400)
+    from .daily import today_actions
+    category = request.POST.get('category', '').strip() or None
+    return JsonResponse({'choices': today_actions(response, category=category)})
 
 
 def _level_event(ev, request):
@@ -189,7 +200,7 @@ def step_done(request):
                 },
             )
         from .daily import today_actions
-        return JsonResponse({'choices': today_actions(response),
+        return JsonResponse({'choices': today_actions(response, category=action.category),
                              'progress': today_progress(response),
                              'level_event': level_event})
 

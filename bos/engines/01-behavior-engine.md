@@ -28,6 +28,11 @@ an action's difficulty **scales with level**.
 ## Current implementation
 - `plans/models.py`: `Level`, `UserProgram`, `ActionDef` (+ `target_for_level`). Seeded 1–20 in `migrations/0008`.
 - `plans/daily.py::today_actions()` — serves ≥3 actions (core first, then a mission), level-scaled titles.
+- **Home-screen area choice (UX layer):** the ritual now opens on **category bubbles**
+  (`daily.categories_meta()`); the user picks an area and `today_actions(category=…)` serves only
+  that area's actions. Selection rules are unchanged (core-first, weakest-habit adaptation, safety
+  gating) — they now run *within* the chosen area. Note: the "≥3/day includes core habits" guarantee
+  becomes user-gated (they choose which areas to engage).
 
 ## Boundaries (do NOT do here)
 - Verifying completion → Verification Engine.

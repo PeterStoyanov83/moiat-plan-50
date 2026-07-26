@@ -7,6 +7,7 @@ urlpatterns = [
     path('questionnaire/', views.questionnaire, name='questionnaire'),
     path('ritual/', views.ritual, name='ritual'),
     path('ritual/done/', views.step_done, name='step_done'),
+    path('ritual/choices/', views.ritual_choices, name='ritual_choices'),
     path('ritual/swap/', views.step_swap, name='step_swap'),
     path('ritual/reflect/', views.reflect, name='reflect'),
     path('api/verify/', views.verify_action, name='verify_action'),

@@ -16,6 +16,23 @@ ICON_BY_CATEGORY = {
     'sleep': 'sleep', 'social': 'friend', 'mind': 'stretch', 'financial': 'coin',
 }
 
+# The areas the user chooses between (home-screen bubbles). slug · warm BG label · icon.
+CATEGORY_META = [
+    ('movement', 'Движение', 'walk'),
+    ('nutrition', 'Хранене', 'salad'),
+    ('hydration', 'Вода', 'water'),
+    ('sleep', 'Сън', 'sleep'),
+    ('social', 'Близост', 'friend'),
+    ('mind', 'Спокойствие', 'stretch'),
+    ('financial', 'Финанси', 'coin'),
+]
+
+
+def categories_meta():
+    """Category bubbles for the ritual home. Only areas that have active actions."""
+    present = set(ActionDef.objects.filter(is_active=True).values_list('category', flat=True))
+    return [{'slug': s, 'label': l, 'icon': i} for s, l, i in CATEGORY_META if s in present]
+
 # Recovery only reduces *workload* (spec §5). Effort/volume metrics may scale down;
 # restorative metrics (sleep hours, hydration glasses) never do — less sleep/water
 # is not recovery.
@@ -114,9 +131,11 @@ def _resolve_safe(action, tags, by_slug):
     return None
 
 
-def today_actions(response, today=None, n=3):
+def today_actions(response, today=None, n=3, category=None):
     """≥3 safe actions for today: undone core habits first, then a mission.
-    Contraindicated actions are replaced by a safe alternative or dropped."""
+    Contraindicated actions are replaced by a safe alternative or dropped. When
+    ``category`` is given (the user picked an area on the home screen), only that
+    area's actions are offered."""
     today = today or timezone.localdate()
     program, _ = UserProgram.objects.get_or_create(response=response)
     level = program.current_level
@@ -126,8 +145,9 @@ def today_actions(response, today=None, n=3):
     ).values_list('action__slug', flat=True))
     tags = user_contraindications(response)
 
-    active = list(ActionDef.objects.filter(is_active=True))
-    by_slug = {a.slug: a for a in active}
+    all_active = list(ActionDef.objects.filter(is_active=True))
+    by_slug = {a.slug: a for a in all_active}   # safe-alternative lookup spans all areas
+    active = [a for a in all_active if not category or a.category == category]
     core = [a for a in active if a.type == ActionDef.CORE]
     missions = [a for a in active if a.type == ActionDef.MISSION]
     rng = random.Random((response.pk or 0) + today.toordinal())
