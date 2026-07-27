@@ -13,45 +13,66 @@ step at a time; the user does it or swaps for another, and the next is offered.
 
 ---
 
-## Current status (2026-07-15) — LIVE, all shipped on `main`
+## Current status (2026-07-27) — LIVE on `main`
 
-The full ritual redesign + accounts are deployed and verified in production.
+The web-MVP behavioral platform (the **BOS**, 7 engines) is deployed. Per-engine completeness
+lives in `bos/STATUS.md` — **6 of 7 at 🟢/✅**; only mobile/sensor work (Track B) + the legal
+launch gate remain. Full loop: category bubbles → area-filtered daily steps → verify → tree
+growth + level-up → gentle recovery → AI reflection that learns.
 
 ### User flow
 1. `/` home → „Направи първата стъпка" (or „Влез с Google" / „Вход")
 2. `/questionnaire/` — 18-q interview (+ `first_name`, GDPR consent). Prefilled name if signed in.
 3. → **session** `response_id` + (if logged in) tie to user → redirect to `/ritual/`
-4. `/ritual/` — the daily one-step ritual (single step, „Направих го" / „Покажи ми друга",
-   micro-celebration, then next; „Приключих за днес" ends). Greeting line is AI-written when enabled.
-5. `/ritual/done/`, `/ritual/swap/` — JSON endpoints (step engine).
-6. `/progress/` — Напредък: streak, 7-day chart, recent steps.
-7. `/result/<id>/` — the old full 7-day plan, kept as „Пълен план"; `/download/<id>/` PDF.
+4. `/ritual/` — the daily ritual: opens on **category bubbles** (Движение · Хранене · Вода · Сън ·
+   Близост · Спокойствие · Финанси). Pick an area → its steps (A/Б/В, level-scaled, safety-gated) →
+   done → next step in the same area; „Приключих за днес" ends → celebration + end-of-day reflection.
+5. Ritual endpoints: `/ritual/choices/` (area's actions), `/ritual/done/` (complete + lazy level
+   check), `/ritual/reflect/` (save reflection), `/api/verify/` (objective verification — future
+   mobile). `/ritual/swap/` is legacy.
+6. `/progress/` — „Твоето дърво": the living tree (grows with verified actions, animates on
+   level-up), streak/total, recent steps, link to Размисли.
+7. `/reflections/` — „Твоите размисли": journal of past reflections **+ today's composer** (reflect & revisit).
 8. `/profile/` — account: name, email, login method, streak/total, links.
-9. `/accounts/*` — allauth: login, signup, password reset/change, email mgmt.
-10. `/admin/` — Django admin (username + password).
+9. `/accounts/*` — allauth. `/admin/` — Django admin. Bottom nav: **Днес · Напредък · Размисли · Профил**.
+   (`/result/<id>/` full 7-day plan + `/download/` PDF still exist but are **unlinked** from the UI.)
 
 ### Architecture (app `plans`)
 ```
 plans/
-├── models.py           # QuestionnaireResponse(+user FK,+first_name,+consent), UserPlan, Feedback, StepCompletion
-├── knowledge_base.py   # loads data/knowledge_base.json; level mapping (movement/nutrition)
-├── data/knowledge_base.json  # the step library (task pools by level + social/finance)
-├── step_engine.py      # eligible_steps / offer_step / mark_done / today_progress / weekly_history
-├── ai_companion.py     # optional: Claude (Haiku 4.5) picks step + writes line; falls back to engine
-├── profile_logic.py    # determine_profile() + generate_plan() (for the full plan / PDF)
-├── views.py            # home, questionnaire, ritual, step_done, step_swap, progress, profile, result, pdf, feedback, privacy
-├── context_processors.py  # google_flags + nav_context (supplies nav_plan_id to every page)
+├── models.py          # QuestionnaireResponse, UserPlan, Feedback, StepCompletion, Level,
+│                      #   ActionDef, UserProgram, ActionLog, HabitStability, TreeState,
+│                      #   DailyAssignment, Reflection
+├── daily.py           # ritual's action server: today_actions(category=…) — core-first, level-scaled,
+│                      #   contraindication-gated, recovery-tapered; categories_meta() (bubbles)
+├── behavior.py        # Behavior engine (01): per-level mission themes + weakest-habit adaptation
+├── progression.py     # Level engine (04): mastery scoring + promote/extend
+├── verification.py    # Verification engine (03): verify() sensor/timer/location/photo/confirm + anti-cheat
+├── tree_state.py      # Tree (06) + Recovery (05): growth stage, health/dormant, recovery window + factor
+├── reflection.py      # daily reflection question pool + storage + recent_answers (AI learning loop)
+├── ai_companion.py    # optional Claude (Haiku): warm line + AI reflection question; graceful fallback
+├── apps.py            # PostHog client init (disabled when no key)
+├── step_engine.py     # LEGACY step engine — still feeds ai_companion candidates + the unused swap
+├── knowledge_base.py / data/knowledge_base.json  # LEGACY: power only the old full-plan/PDF
+├── profile_logic.py   # determine_profile() + generate_plan() (full plan / PDF only)
+├── views.py           # home, questionnaire, ritual, ritual_choices, step_done, reflect, verify_action,
+│                      #   progress, reflections, profile, result, pdf, feedback, privacy
+├── context_processors.py  # google_flags
 ├── forms.py, admin.py, urls.py
-└── templates/plans/    # base.html (calm cream), home, questionnaire, ritual, progress, profile, result, pdf_plan, privacy, feedback*
-                        # + _topnav.html / _bottomnav.html — shared nav partials (top + bottom) used app-wide
+└── templates/plans/   # base, home, questionnaire, ritual, progress, reflections, profile, result,
+                       #   pdf_plan, privacy, feedback*  + _topnav.html / _bottomnav.html partials
 templates/allauth/layouts/base.html   # brands all allauth pages (project DIRS override)
-onestep/settings.py     # allauth + google + email/password + email backend + hardening
+onestep/settings.py    # allauth + google + email/password + Resend SMTP + PostHog + hardening
+bos/                   # governance: CONSTITUTION · README · STATUS · engines/01–07 (source of truth)
 ```
 
-### Key design: the KB *is* the step library
-`generate_plan()` still builds the full plan/PDF, but the **ritual** re-serves the same
-`knowledge_base.json` task pools **one at a time** via `step_engine`. Levels come from
-`movement_level_for` / `nutrition_level_for`; profile sets category priority.
+### Key design: the ActionDef library + the BOS engines
+The daily ritual is served by `daily.today_actions()` from the **ActionDef** library (100 actions,
+full metadata; seeded in `0008`/`0011`/`0012`) — filtered by the user's chosen category, scaled to
+the **system-driven level**, safety-gated (contraindications), and tapered during recovery. Mastery
+(`progression`), adaptation (`behavior`), verification (`verification`) and the tree (`tree_state`)
+are separate single-responsibility engines per `bos/engines/`. The legacy `knowledge_base.json` +
+`step_engine.py` + `generate_plan()` now power only the old full-plan/PDF (unlinked from the UI).
 
 ---
 
@@ -81,10 +102,18 @@ Healthcheck fix (historical): `ALLOWED_HOSTS` always appends `.railway.app`; no 
 ---
 
 ## Migrations
-`0001`–`0003` base + consent · `0004` first_name + StepCompletion · `0005` user FK · `0006` Site name→„1Step".
+`0001`–`0003` base + consent · `0004` first_name + StepCompletion · `0005` user FK · `0006` Site
+name→„1Step" · `0007` habit-engine schema (Level, ActionDef, UserProgram, ActionLog, HabitStability,
+TreeState, DailyAssignment) · `0008` seed (20 levels + 8 starter actions) · `0009`–`0010` ActionDef
+metadata + backfill · `0011`–`0012` library → **100 actions** · `0013` Reflection.
 
 ## Tests
-`plans/tests.py` — 18 tests (step engine, ritual flow, progress, AI-companion fallback+mock, Google account ownership/claim). All green. Run: `python manage.py test plans`.
+`plans/tests.py` — **49 tests**, all green (step engine, ritual flow, progress, AI companion,
+Google claim, Knowledge library contract + contraindication inference, Recovery taper,
+Reflection + journal + input bounds, Behavior themes/adaptation, Level promote/extend,
+Verification endpoint, category selection). Run: `POSTHOG_API_KEY="" ./venv/bin/python manage.py test plans`
+(empty key keeps the analytics client disabled during tests; use `./venv/bin/python -m pip` — the
+venv's `pip` shebang broke on the folder rename).
 
 ---
 
