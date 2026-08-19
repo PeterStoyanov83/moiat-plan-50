@@ -103,8 +103,18 @@ def ritual(request):
     level_event = _level_event(ev, request)
     # The user first picks an area (category bubbles); actions load for that area.
     # On return from a long gap, recovery framing leads (gentle, never shaming).
-    companion_message = welcome_back_message(response) or companion_message
+    welcome_msg = welcome_back_message(response)
+    companion_message = welcome_msg or companion_message
     plan = getattr(response, 'plan', None)
+    distinct_id = str(request.user.pk) if request.user.is_authenticated else f'response-{response.pk}'
+    apps.posthog_client.capture(
+        distinct_id=distinct_id,
+        event='ritual_viewed',
+        properties={
+            'authenticated': request.user.is_authenticated,
+            'has_welcome_back_message': bool(welcome_msg),
+        },
+    )
     context = {
         'greeting_name': response.first_name or '',
         'categories': json.dumps(categories_meta(), ensure_ascii=False),
@@ -285,6 +295,17 @@ def progress(request):
     # Living tree: system-driven level (never user-picked) + gentle inactivity health.
     from .tree_state import compute_tree_state
     tree = compute_tree_state(response)
+    distinct_id = str(request.user.pk) if request.user.is_authenticated else f'response-{response.pk}'
+    apps.posthog_client.capture(
+        distinct_id=distinct_id,
+        event='progress_viewed',
+        properties={
+            'authenticated': request.user.is_authenticated,
+            'streak': prog['streak'],
+            'tree_level': tree['level'],
+            'tree_dormant': tree['dormant'],
+        },
+    )
     context = {
         'greeting_name': response.first_name or '',
         'streak': prog['streak'],
